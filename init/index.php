@@ -2,8 +2,8 @@
 
 use Engine\App\App as Application;
 
-if (file_exists('./config.php')) {
-    require_once './config.php';
+if (file_exists(dirname(__FILE__) . '/config.php')) {
+    require_once dirname(__FILE__)  . '/config.php';
 }
 
 if (is_dir(ENGINE_DIR)) {
@@ -19,8 +19,8 @@ if(file_exists(LIBRARY_DIR . "/autoload.php")) {
 
 ## Launch aplication
 $app = new Application();
-$app->bootstrap('./build_launch.php');
-$app->bootstrap('./database/init.php');
+$app->bootstrap(DIR_PATH . 'build_launch.php');
+$app->bootstrap(DIR_PATH . 'database/init.php');
 
 ## Save app for implementation
 $GLOBALS['app'] = $app;

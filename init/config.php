@@ -16,7 +16,7 @@ define("API_PATH",      DIR_PATH . "api/");
 ## Database Config
 define("USER_NAME",     "root");
 define("PASSWORD",      "123456789");
-define("DATABASE",      "127.0.0.1");
+define("DATABASE",      "db_blog");
 define("DB_PORT",       "3306");
 define("DB_NAME",       "rest_api");
 define("DB_PREFIX",     "");
@@ -34,5 +34,5 @@ define("SERVICE_API_KEY", "ABSD9810324000");
 define("ROOT_PASSWORD", password_hash('TheDreamer', PASSWORD_BCRYPT));
 
 
-define('DB_INTERVAL_CHECK', 2);
-define('DB_NUM_TRIALS', 5);
+define('DB_INTERVAL_CHECK', 5);
+define('DB_NUM_TRIALS', 100);

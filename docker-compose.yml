@@ -5,7 +5,9 @@ services:
   api: 
     image: rest-api:latest
     restart: always
-    command: apachectl -D FOREGROUND   
+    command: >
+      sh -c "php /var/init/index.php
+      && apachectl -D FOREGROUND"   
     volumes: 
       - ./:/var/www/html
     ports: 

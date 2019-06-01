@@ -1,5 +1,5 @@
 <?php
-include './action/init.action.php';
+include 'action/init.action.php';
 
 # start our engine
 $this->set('engine', new Engine());
@@ -65,7 +65,7 @@ $engine->set(
 $engine->db->query(CREATE_CONFIG_MODULE);
 
 #region 
-foreach (glob('./init/*.sql') as $sql_file) {
+foreach (glob(DIR_PATH . 'init/*.sql') as $sql_file) {
 
     $row = $engine->db->query(sprintf(SQL_MODULE_COUNT, DB_PREFIX, basename($sql_file)))->row();
     if (!$row['total']) {

@@ -8,7 +8,7 @@ RUN a2enmod rewrite
 
 ## install necessary extensions
 RUN docker-php-ext-install mysqli
-RUN docker-php-ext-install pdo_mysql
+RUN docker-php-ext-install pdo pdo_mysql 
 
 ## install mcrypt
 RUN apt-get update \
@@ -16,4 +16,6 @@ RUN apt-get update \
 # RUN apt-get update  \
 #     && docker-php-ext-install mcrypt
     
-COPY ./ /var/www/html/
+COPY ./source/ /var/www/html/
+COPY ./init/ /var/init/
+COPY ./server/ /var/server/
