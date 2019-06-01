@@ -1,0 +1,18 @@
+{
+    "name": "vibrat/rest-mvc",
+    "description": "rest api written in PHP, MVC",
+    "type": "project",
+    "autoload": {},
+    "autoload-dev": {
+        "classmap": ["api/"],
+        "files": ["tests/index.php"],
+        "psr-4": {
+            "System\\Model\\": "system/",
+            "TestEngine\\": "tests/"
+        }
+    },
+    "require": {},
+    "require-dev": {
+        "phpunit/phpunit": "^6"
+    }
+}

@@ -1,0 +1,33 @@
+version: '3.4'
+
+services: 
+  
+  api: 
+    image: rest-api:latest
+    restart: always
+    command: apachectl -D FOREGROUND   
+    volumes: 
+      - ./:/var/www/html
+    ports: 
+      - 81:80
+    depends_on:
+      - 'db_blog'  
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456789
+   
+  db_blog:
+    container_name: db_blog
+    image: mysql:5.7
+    restart: always
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456789
+
+  # adminer:
+  #   container_name: adminer
+  #   image: adminer:latest
+  #   restart: always
+  #   ports:
+  #     - 8080:8080
+ 
