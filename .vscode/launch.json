@@ -8,6 +8,10 @@
             "name": "Listen for XDebug",
             "type": "php",
             "request": "launch",
+            "pathMappings": {
+                "/var/init/": "${workspaceRoot}/init",
+                "/var/www/html": "${workspaceRoot}/source"
+            },
             "port": 9000
         },
         {
