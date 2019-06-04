@@ -73,7 +73,11 @@ class Authenticator {
             $user_id = $query_token->row('id')
         ));
 
-        $permissions = json_decode($query_permission->row('permission'))->api;
+        ## Decode permissions string
+        $permissions = json_decode($query_permission->row('permission'));
+        if ($permissions) {
+            $permissions = $permissions->api;
+        }
 
         if (in_array($permission_url, ($permissions ? $permissions : [])) || $user_id == 1) {
            

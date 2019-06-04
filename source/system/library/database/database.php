@@ -51,17 +51,24 @@ class MySqliDatabase {
      * 
      * @param String SQL statements
      */
-    public function query(String $sql) {
+    public function query(String $sql, Array $data = []) {
         
         ## Start connection
-        $conn = $this->connect($sql); 
-
-        ## Add response to hanlder
+        $conn = $this->connect($sql);
         
-        if ($conn && $query = $conn->query($sql)) {
+        ## Execute non-param statement
+        if (empty($data) && $conn && $query = $conn->query($sql)) {
             $this->response->initDataConnection($query);
         }
 
+        ## binding to value to prevent XSS
+        if ($conn && !empty($data)) {
+            $cursor = $conn->prepare($sql);
+            if ($cursor->execute($data)) {
+                $this->response->initDataConnection($cursor);
+            }
+        }
+        
         ## close connection to database
         $this->close($conn);
         
