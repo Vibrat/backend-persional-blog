@@ -10,6 +10,9 @@ use Vendor\Apier\Apier;
 use beFunc\beFunc as Befunc;
 use Http\DataSubmit;
 
+// Define unknown global variables
+$_SERVER['REQUEST_METHOD'] = '';
+
 session_start([
     'cookie_lifetime' => 86400,
 ]);

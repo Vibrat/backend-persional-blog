@@ -16,8 +16,19 @@ final class GroupPermissionControllerTest extends TestCase {
 
     public function testIndex() {
         $_GET['api'] = '';
-        $controller = new GroupPermissionController($this->dependencies);
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+      
+        $mock_http = $this->createMock(Http\DataSubmit::class);
+        $mock_http->expects($this->any())->method('data')
+            ->willReturn([
+                'GET' => [
+                    'action' => true
+                ]
+            ]);
 
-        $this->assertEquals(4, $controller->index());
+        $this->dependencies['http'] =  $mock_http;            
+        $controller = new GroupPermissionController($this->dependencies);
+        
+        $this->assertEquals(null, $controller->index());
     }
 }
