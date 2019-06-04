@@ -48,8 +48,13 @@ class MySqliDatabase {
 
     /**
      * Query values from database
-     * 
-     * @param String SQL statements
+     *      
+     *  - This method supports both absolute string query and params binding queries. 
+     *    For a security solution please pass values into $data
+     *  - If you just want to query a string without params, leave $data as empty
+     *    
+     * @param String SQL sql query statement
+     * @param Array $data  data for params binding
      */
     public function query(String $sql, Array $data = []) {
         
