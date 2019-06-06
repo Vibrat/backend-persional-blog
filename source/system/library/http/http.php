@@ -13,17 +13,33 @@ class DataSubmit {
                 break;
             case 'PUT':
                 $this->data['GET']  = $_GET;
+                parse_str(
+                    file_get_contents(
+                        'php://input', 
+                        false , 
+                        null, 
+                        0, 
+                        $_SERVER['CONTENT_LENGTH'] ), 
+                    $this->data['PUT']);
             case 'GET':
                 $this->data['GET'] = $_GET;   
                 break; 
             case 'DELETE':
-                $this->data['GET'] = $_GET;    
+                $this->data['GET'] = $_GET;
+                parse_str(
+                    file_get_contents(
+                        'php://input', 
+                        false , 
+                        null, 
+                        0, 
+                        $_SERVER['CONTENT_LENGTH'] ), 
+                    $this->data['DELETE']);    
                 break;         
         }
     }
 
-    public function data() {
-        return $this->data;
+    public function data($name) {
+        return $this->data[$name];
     }
 
     public function method() {

@@ -22,8 +22,11 @@ use System\Model\Controller;
 class MenuController extends Controller {
 
     public function isAlive() {
+        $data = $this->http->data('PUT');
+        preg_match("/(?:\\\")([^\"]*)(?:\\\")(?:\\r\\n\\r\\n)([^\\r\\n])(?:\\r\\n)/", array_shift($data), $matches, PREG_OFFSET_CAPTURE, 0);
         $this->json->sendBack([
-            'isAlive' => true
+            'isAlive' => true,
+            'data' => $matches
         ]);
     }
 
