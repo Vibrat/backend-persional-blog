@@ -23,10 +23,21 @@ class MenuController extends Controller {
 
     public function isAlive() {
         $data = $this->http->data('PUT');
-        preg_match("/(?:\\\")([^\"]*)(?:\\\")(?:\\r\\n\\r\\n)([^\\r\\n])(?:\\r\\n)/", array_shift($data), $matches, PREG_OFFSET_CAPTURE, 0);
+        
+        ## parse data from HTTP Header
+        $raw = array_shift($data);
+        $str_lines = preg_split("/\\r\\n----------------------------\d*-{0,2}\\r\\n(Content-Disposition: form-data; ){0,}/", $raw);
+        foreach($str_lines as $line) {
+
+            [$key, $value] = preg_split("/\\r\\n\\r\\n/", $line);
+            preg_match("/\"(.*?)\"/", $key, $key);
+            $data[$key] = $value;
+        }
+        
         $this->json->sendBack([
             'isAlive' => true,
-            'data' => $matches
+            'data' => $data,
+            'raw'  =>  $str_lines
         ]);
     }
 
