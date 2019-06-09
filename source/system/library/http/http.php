@@ -52,11 +52,11 @@ class DataSubmit {
         foreach($data_lines as $line) {
             if (!empty($line)) {
                 [$raw_key, $value] = preg_split("/\\r\\n\\r\\n/", $line);
-                preg_match_all('/(?:;|\r\n|\s)?([a-zA-Z\s\.\d\"\/=:-]*)(?:;\s)?/', $raw_key, $headers);
+                preg_match_all('/(?:;|\r\n|\s)?([a-zA-Z\s\.\d\"\/=:\-_]+)(?:;\s)?/', $raw_key, $headers);
                 if (!empty($headers)  && count($headers) >= 2) {
                     array_shift($headers);
                     ## check if this is a file request
-                    array_walk_recursive($headers, array($this, 'get_data_from_http'), $value);
+                    array_walk($headers, array($this, 'get_data_from_http'), $value);
                 }
             }
         }
@@ -64,22 +64,31 @@ class DataSubmit {
         return $data;
     }
 
-    function get_data_from_http(&$header, &$key, $value) {
-        if (preg_match("/^filename=/", $header) && !empty($header)) {
-            preg_match("/(?:\")(.*)(?:\")/", $header, $raw_filename);
-            preg_match("/(?:Content-Type:\s)(.*)/", $header, $raw_content_type);
-            preg_match("/(?:\")(.*)(?:\")/", $header, $raw_key);
-        } else {
-            preg_match("/(?:\")(.*)(?:\")/", $header, $raw_key);
+    function get_data_from_http($header, $key, $value) {
+
+        $header = array_filter($header, function ($item_val) {
+            return !empty($item_val);
+        });
+
+        $data = [];
+        foreach ($header as $row_data) {
+            if (preg_match("/^filename=/", $row_data) && !empty($row_data)) {
+                preg_match("/(?:\")(.*)(?:\")/", $row_data, $raw_filename);
+                preg_match("/(?:Content-Type:\s)(.*)/", $row_data, $raw_content_type);
+                $data = array_merge($data, [
+                    'filename' => $raw_filename[1],
+                    'Content-Type' => $raw_content_type[1]
+                ]);
+            } elseif (preg_match("/^(name=)|(\"[a-zA-Z\s\.\d\"\/=:\-_]*\"$)/", $row_data)){
+                preg_match("/(?:\")([a-zA-Z\s\.\d\"\/=:\-_]*)(?:\")/", $row_data, $raw_key);
+                $data['key'] = $raw_key[1];
+                $data['value'] = $value;
+            }
+
         }
 
-        if (!empty($raw_key)) {
-            $this->http_response[$raw_key[1]] = [
-                'key' => $raw_key[1] ? $raw_key[1] : null,
-                'value' => $value,
-                'filename' => !empty($raw_filename) && $raw_filename[1] ? $raw_filename[1]: null,
-                'Content-Type' => !empty($raw_content_type) && $raw_content_type[1] ? $raw_content_type[1] : null
-            ];
+        if (isset($data['key'])) {
+            $this->http_response[$data['key']] = $data;
         }
     }   
 }
