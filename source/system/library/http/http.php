@@ -45,7 +45,6 @@ class DataSubmit {
         $data = [];
         ## parse data from HTTP Header
         parse_str(file_get_contents('php://input', false , null, 0, $_SERVER['CONTENT_LENGTH'] ), $data);
-        var_dump($data);
         $data_lines = preg_split("/\\r\\n----------------------------\d*-{0,2}\\r\\n(Content-Disposition: form-data; ){0,}/", array_shift($data));
         $headers = [];
 
@@ -61,7 +60,7 @@ class DataSubmit {
             }
         }
 
-        return $data;
+        return $this->http_response;
     }
 
     function get_data_from_http($header, $key, $value) {
@@ -84,7 +83,6 @@ class DataSubmit {
                 $data['key'] = $raw_key[1];
                 $data['value'] = $value;
             }
-
         }
 
         if (isset($data['key'])) {
