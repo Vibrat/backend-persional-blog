@@ -7,6 +7,11 @@ class DataSubmit {
 
     function __construct()
     {
+        ## Limit communication size with HTTP
+        if  ($_SERVER['CONTENT_LENGTH'] >= OPTION_HTTP_MAX_SIZE_SUPPORT) {
+            throw new \Exception('Communication package size is limited to 10 Mb');
+        }
+
         switch($_SERVER['REQUEST_METHOD']) {
             case 'POST': 
                 $this->data['POST'] = $_POST;
@@ -43,7 +48,7 @@ class DataSubmit {
      */
     private function parse_data() {
         $data = [];
-        ## parse data from HTTP Header
+       
         parse_str(file_get_contents('php://input', false , null, 0, $_SERVER['CONTENT_LENGTH'] ), $data);
         $data_lines = preg_split("/\\r\\n----------------------------\d*-{0,2}\\r\\n(Content-Disposition: form-data; ){0,}/", array_shift($data));
         $headers = [];
@@ -88,5 +93,5 @@ class DataSubmit {
         if (isset($data['key'])) {
             $this->http_response[$data['key']] = $data;
         }
-    }   
+    } 
 }

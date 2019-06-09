@@ -9,6 +9,7 @@ use Token\Token;
 use Vendor\Apier\Apier;
 use beFunc\beFunc as Befunc;
 use Http\DataSubmit;
+use TheSeer\Tokenizer\Exception;
 
 session_start([
     'cookie_lifetime' => 86400,
@@ -56,7 +57,16 @@ $engine->apier->setHeaders([
     'Content-Type: application/json',
 ]);
 
-$engine->set('http', new DataSubmit());
+try {
+    $engine->set('http', new DataSubmit());
+} catch (\Exception $e) {
+    $engine->json->sendBack([
+        'success' => false,
+        'message' => $e->getMessage()
+    ]);
+    return;
+}
+
 
 ## Load and inject dependencies  
 $engine->router->load(
