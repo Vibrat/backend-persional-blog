@@ -7,11 +7,30 @@
 class GroupModel extends BaseModel
 {
 
+    public function getSummary() {
+        $sql = "SELECT COUNT(id) AS total FROM `" . DB_PREFIX . "users_group`";
+        return $this->db->query($sql)->row('total');
+    }
+
     public function newGroup(array $data)
     {
 
         $sql = "INSERT INTO `" . DB_PREFIX . "users_group` SET name = '" . $data['name'] . "', permission = '" . $data['permission'] . "'";
         return $this->db->query($sql)->rowsCount();
+    }
+
+    public function listGroups($data) {
+        
+        if (
+            is_numeric($data['offset']) && 
+            is_numeric($data['limit'])
+            ) {
+
+            $sql = "SELECT * FROM `" . DB_PREFIX . "users_group` LIMIT " . (int) $data['offset'] . ", " . (int) $data['limit'] . "";
+            return $this->db->query($sql)->rows();
+        }
+       
+        throw new \Exception("offset and limit values are in correct");
     }
 
     public function countGroup(String $group_name)

@@ -31,8 +31,11 @@ class DataSubmit {
         }
     }
 
-    public function data($name) {
-        return $this->data[$name];
+    public function data($name = null) {
+        if ($name) 
+            return $this->data[$name];
+
+        return $this->data;
     }
 
     public function method() {
@@ -68,7 +71,7 @@ class DataSubmit {
         return $this->http_response;
     }
 
-    function get_data_from_http($header, $key, $value) {
+    private function get_data_from_http($header, $key, $value) {
 
         $header = array_filter($header, function ($item_val) {
             return !empty($item_val);

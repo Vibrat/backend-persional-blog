@@ -2,9 +2,15 @@
 namespace Vendor\Apier;
 
 /**
- * Apier Class used for call APIs
+ * Apier class which is used to call external API
  * 
  * Design by https://www.weichieprojects.com/blog/curl-api-calls-with-php/
+ *   
+ * @example
+ * $res = $this->apier->call(
+ *          'POST', 'http://localhost:81/index.php?api=post/account/register/new-account', [
+ *          'username' => 'lamnguyen22323', 'password' => '1234382173468326123123'
+ * ]);
  */
 class Apier {
 

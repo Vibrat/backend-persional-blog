@@ -25,7 +25,7 @@ class GroupPermissionController extends Controller
           $this->listPermissions();
         } elseif ($action == 'list') {
 
-          $this->listGroups();
+          $this->listGroups($this->http->data('GET'));
         }
 
         break;
@@ -59,8 +59,36 @@ class GroupPermissionController extends Controller
     }
   }
 
-  public function listGroups()
-  {
+  public function listGroups($data)
+  { 
+    if ($this->user->isTokenValid($data['token'])) {
+  
+      $this->model->load('account/group');
+      try {
+        $db_res = $this->model->group->listGroups($data);
+        $db_num_records = $this->model->group->getSummary();
+        
+        $this->json->sendBack([
+          'success'     => true,
+          'data'        => $db_res,
+          '_statistics' => [
+            'total'     => $db_num_records,
+            'offset'    => $data['offset'],
+            'limit'     => $data['limit']
+          ]
+        ]);
+
+        return;
+      } catch(\Exception $e) {
+        $this->json->sendBack([
+          'success' => false,
+          'message' => $e->getMessage()
+        ]);
+
+        return;
+      }
+    }
+
     $this->json->sendBack([
       'success' => false,
       'message' => 'Please check your token'
