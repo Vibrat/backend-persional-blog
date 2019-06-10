@@ -8,7 +8,7 @@ class DataSubmit {
     function __construct()
     {
         ## Limit communication size with HTTP
-        if  ($_SERVER['CONTENT_LENGTH'] >= OPTION_HTTP_MAX_SIZE_SUPPORT) {
+        if  (isset($_SERVER['CONTENT_LENGTH']) && $_SERVER['CONTENT_LENGTH'] >= OPTION_HTTP_MAX_SIZE_SUPPORT) {
             throw new \Exception('Communication package size is limited to 10 Mb');
         }
 

@@ -14,7 +14,6 @@ CREATE TABLE `modules_config` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-
 DROP TABLE IF EXISTS `pizza`;
 CREATE TABLE `pizza` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
