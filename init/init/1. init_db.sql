@@ -56,8 +56,8 @@ CREATE TABLE `users_permission` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   KEY `group_permission_id` (`group_permission_id`),
-  CONSTRAINT `users_permission_ibfk_8` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE,
-  CONSTRAINT `users_permission_ibfk_9` FOREIGN KEY (`group_permission_id`) REFERENCES `users_group` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE
+  CONSTRAINT `users_permission_ibfk_8` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `users_permission_ibfk_9` FOREIGN KEY (`group_permission_id`) REFERENCES `users_group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 INSERT INTO `users_permission` (`id`, `user_id`, `group_permission_id`) VALUES

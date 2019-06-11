@@ -114,6 +114,20 @@ class GroupModel extends BaseModel
 
             return false;
         }
+    }
 
+    /**
+     * Cascade delete a group
+     * affected tables: 'users_group', 'user_permissions'
+     * 
+     * 
+     * @param string $name name of group to delete
+     * @return number number of rows affected
+     */
+    public function deleteGroupByName($name = '') {
+        $sql = "DELETE FROM `" . DB_PREFIX . "users_group` WHERE name = :name LIMIT 1";
+        return $this->db->query($sql, [
+            ':name' => $name
+        ])->rowsCount();
     }
 }

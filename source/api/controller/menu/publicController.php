@@ -19,7 +19,7 @@ use System\Model\Controller;
  * @Flow\Scope("singleton")
  * @return Json 
  */
-class MenuController extends Controller {
+class PublicController extends Controller {
 
     /**
      * Check if API is enable
