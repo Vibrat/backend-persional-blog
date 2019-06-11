@@ -4,10 +4,12 @@ namespace JsonStore;
 /**
  * Json Object for handling API Response
  * 
+ * @example 
+ *  - To send data into api: new JsonStore()->sendBack['success' => true]
  */
-
  class JsonStore {
     private $env;
+    
     /**
      * Default init to return JSON
      */
@@ -51,6 +53,6 @@ namespace JsonStore;
      * @param Json $data
      */
     public function json_decode($data) {
-        return json_Decode($data);
+        return json_decode($data);
     }
  }

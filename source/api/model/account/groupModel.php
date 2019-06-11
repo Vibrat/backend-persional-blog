@@ -2,16 +2,36 @@
 
 /**
  * Class Model for Group Permission
+ * 
+ * @method getSummary() return total of records
+ * @method newGroup() create new permission group
+ * @method listGroup() list data
+ * @method countGroup() count number of group based on group_name
+ * @method listPermissions($id) list permissions in table users_permission based on group_id
+ * @method addUserToGroup ($payload) add a user into group permissions 
  */
 
 class GroupModel extends BaseModel
 {
 
+    /**
+     * return total of records
+     * 
+     * @return number or string
+     * @access public
+     */
     public function getSummary() {
         $sql = "SELECT COUNT(id) AS total FROM `" . DB_PREFIX . "users_group`";
         return $this->db->query($sql)->row('total');
     }
 
+    /**
+     * create new record in table users_group
+     * 
+     * @param string[] properties:'name' & 'permission'   
+     * @return int
+     * @access public
+     */
     public function newGroup(array $data)
     {
 
@@ -19,6 +39,12 @@ class GroupModel extends BaseModel
         return $this->db->query($sql)->rowsCount();
     }
 
+    /**
+     * list records from table users_group
+     * 
+     * @param array properties: 'offset', 'limit'
+     * @access public
+     */
     public function listGroups($data) {
         
         if (
@@ -33,6 +59,13 @@ class GroupModel extends BaseModel
         throw new \Exception("offset and limit values are in correct");
     }
 
+    /**
+     * count number of records in table 'users_group' 
+     * 
+     * @param string $group_name name of group to search
+     * @return int number of records
+     * @access public
+     */
     public function countGroup(String $group_name)
     {
 
@@ -43,15 +76,24 @@ class GroupModel extends BaseModel
     /**
      * List Permissions of a Group
      * 
-     * @param Int id 
+     * @param int id 
+     * @return string[] permissions list
+     * @access public
      */
     public function listPermissions($id)
     {
-        $query = $this->db->query("SELECT permission FROM `" . DB_PREFIX . "users_group` WHERE id  = '" . (int)$id . "'");
+        $query = $this->db->query("SELECT permission FROM `" . DB_PREFIX . "users_group` WHERE id  = '" . (int) $id . "'");
 
         return $query->row('permission');
     }
 
+    /**
+     * Add a user to group (insert into table users_permission)
+     * 
+     * @param $string[] $payload contains 'groupId', 'userId'
+     * @return boolean
+     * @access public
+     */
     public function addUserToGroup($payload)
     {
 

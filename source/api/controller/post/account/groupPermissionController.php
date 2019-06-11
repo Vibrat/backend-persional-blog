@@ -11,6 +11,9 @@ use System\Model\Controller;
 class GroupPermissionController extends Controller
 {
 
+  /**
+   * Gate that is used to re-route request
+   */
   public function index()
   {
 
@@ -59,6 +62,7 @@ class GroupPermissionController extends Controller
     }
   }
 
+  
   public function listGroups($data)
   { 
     if ($this->user->isTokenValid($data['token'])) {

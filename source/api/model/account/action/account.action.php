@@ -1,3 +1,3 @@
 <?php
 
-define("ACCOUNT_ADD_NEW", "ACCOUNT_add");
+define("ACCOUNT_ADD_NEW", "ACCOUNT_ADD");
