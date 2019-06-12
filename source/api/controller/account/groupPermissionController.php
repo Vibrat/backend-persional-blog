@@ -11,8 +11,24 @@ use System\Model\Controller;
 class GroupPermissionController extends Controller
 {
   
-  public function listGroups($data)
+  /**
+   * List group of permissions
+   * 
+   * @endpoint GET api=account/group-permission/list&token=<>&offset=<>&&limit=<>
+   * @access public
+   */
+  public function listGroups()
   { 
+    $data = $this->http->data('GET');
+
+    if($this->http->method() != 'GET') {
+      $this->json->sendBack([
+        'success' => false,
+        'message' => 'API only supports method GET'
+      ]);
+      return;
+    }
+
     if ($this->user->isTokenValid($data['token'])) {
   
       $this->model->load('account/group');
@@ -30,13 +46,12 @@ class GroupPermissionController extends Controller
           ]
         ]);
 
-        return;
       } catch(\Exception $e) {
         $this->json->sendBack([
           'success' => false,
           'message' => $e->getMessage()
         ]);
-
+      } finally {
         return;
       }
     }
@@ -77,6 +92,44 @@ class GroupPermissionController extends Controller
         'success' => true,
         'data' => json_decode($permissions)
       ]);
+      return;
+    }
+
+    $this->json->sendBack([
+      'success' => false,
+      'message' => 'Invalid token'
+    ]);
+  }
+
+  public function addPermission() {
+
+    if ($this->http->method() != 'POST') {
+      $this->json->sendBack([
+        'success' => false,
+        'message' => 'This API only supports method POST'
+      ]);
+      return;
+    }
+
+    $get_data = $this->http->data('GET');
+    $post_data = $this->http->data('POST');
+
+    if ($this->user->isTokenValid($get_data['token'])) {
+      $this->model->load('account/group');
+      
+      $response = $this->model->group->addPermission($post_data);
+
+      if ($response) {
+        $this->json->sendBack([
+          'success' => true,
+          'message' => 'successfully update group permission'
+        ]);
+      } else {
+        $this->json->sendBack([
+          'success' => false,
+          'message' => 'Failed to update permission, please check your permission information'
+        ]);
+      }
       return;
     }
 
@@ -134,14 +187,62 @@ class GroupPermissionController extends Controller
     $this->tokenInvalid();
   }
 
+  /**
+   * Update all permissions in table users_permission
+   * 
+   * @endpoint PUT api=account/group-permission/update-group-permission&token=<>
+   * @param string name ngroup name
+   * @param string[] permissions 
+   * @access public 
+   */
   public function updateGroupPermission()
   {
-    $this->json->sendBack([
-      'method' => 'Update'
-    ]);
+    
+    if ($this->http->method() != 'PUT') {
+      $this->json->sendBack([
+        'success' => false,
+        'message' => 'API only supports method PUT'
+      ]);
 
-    ## check method
-    if ($this->user->isTokenValid($_PUT['token'])) {
+      return;
+    }
+
+    $put_data = $this->http->data('PUT');
+    $get_data = $this->http->data('GET');
+    
+    ## Validate data
+    if (!isset($put_data['permission']) || !is_string($put_data['permission'])) {
+      $this->json->sendBack([
+        'success' => false,
+        'message' => 'parameter permission is not set correctly'
+      ]);
+
+      return;
+    }
+
+    if (!isset($put_data['name']) || !is_string($put_data['name'])) {  
+      $this->json->sendBack([
+        'success' => false,
+        'message' => 'parameter name should exist and have a string value'
+      ]);
+
+      return;
+    }
+
+    if ($this->user->isTokenValid($get_data['token'])) {
+      $this->model->load('account/group');
+
+      if ($this->model->group->updateGroupPermissions($put_data)) {
+        $this->json->sendBack([
+          'success' => true,
+          'message' => 'Successfully update permissions'
+        ]);
+      } else {
+        $this->json->sendBack([
+          'success' => false,
+          'message' => 'Your data is already saved into database'
+        ]);
+      }
 
       return;
     }
@@ -149,24 +250,36 @@ class GroupPermissionController extends Controller
     $this->tokenInvalid();
   }
 
+  /**
+   * Add a user to group
+   * 
+   * @endpoint POST account/group-permissions/add-user-to-group&token=<>
+   * @param token
+   * @param userId
+   * @param groupId
+   * @access public
+   */
   public function addUserToGroup()
   {
 
     if ($this->http->method() != 'POST') {
       
       $this->json->sendBack([
-        'success' => fasle,
+        'success' => false,
         'message' => 'Unsupported method for this api'
       ]);
 
       return;
     }
 
-    if ($this->user->isTokenValid($this->http->data()['GET']['token'])) {
+    $get_data  = $this->http->data('GET');
+    $post_data = $this->http->data('POST');
+
+    if ($this->user->isTokenValid($get_data['token'])) {
 
       $this->model->load('account/group');
 
-      if ($this->model->group->addUserToGroup($this->http->data()['POST'])) {
+      if ($this->model->group->addUserToGroup($post_data)) {
         $this->json->sendBack([
           'success' => true,
           'message' => 'Group has been added a permission'
@@ -176,10 +289,13 @@ class GroupPermissionController extends Controller
       }
 
       $this->json->sendBack([
-        'success' => Fasle,
-        'message' => 'Error: Please check if Group Exists or UserId Exists'
+        'success' => false,
+        'message' => 'Error: Please check if group exists or UserId Exists'
       ]);
+      return;
     }
+
+    $this->tokenInvalid();
   }
 
   /**

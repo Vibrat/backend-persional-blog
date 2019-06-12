@@ -94,7 +94,7 @@ class DataSubmit {
         }
 
         if (isset($data['key'])) {
-            $this->http_response[$data['key']] = $data;
+            $this->http_response[$data['key']] = $data['value'];
         }
     } 
 }

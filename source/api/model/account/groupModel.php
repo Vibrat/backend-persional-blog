@@ -117,6 +117,25 @@ class GroupModel extends BaseModel
     }
 
     /**
+     * Update full permission into table users_group
+     * 
+     * @param Array $data contains 'permission', 'name'
+     */
+    public function updateGroupPermissions(Array $data) {
+
+        $sql = "UPDATE `" . DB_PREFIX . "users_group` SET permission = :permission WHERE name = :name";
+        
+        $query = $this->db->query($sql, [
+            ':permission' => $data['permission'],
+            ':name'       => $data['name']  
+        ]);
+        
+        $affected_rows = $query->rowsCount();
+
+        return $affected_rows;
+    }
+
+    /**
      * Cascade delete a group
      * affected tables: 'users_group', 'user_permissions'
      * 
@@ -129,5 +148,24 @@ class GroupModel extends BaseModel
         return $this->db->query($sql, [
             ':name' => $name
         ])->rowsCount();
+    }
+
+    public function addPermission(Array $data) {
+        $sql_permission = "SELECT `permission` FROM `" . DB_PREFIX . "users_group` WHERE name = :name";
+        $permission = $this->db->query($sql_permission, [
+            ':name' => $data['name']
+        ])->row('permission');
+        
+        $permission = empty($permission) ? '{ "api": []}' : $permission;
+        $permission = json_decode($permission);
+        array_push($permission->api, $data['permission']);    
+
+        $sql_update_permission = "UPDATE `" . DB_PREFIX . "users_group` SET permission = :permission WHERE name = :name";
+        $query = $this->db->query($sql_update_permission, [
+            ':permission'   => json_encode($permission),
+            ':name'         => $data['name']
+        ]);
+        
+        return $query->rowsCount();
     }
 }
