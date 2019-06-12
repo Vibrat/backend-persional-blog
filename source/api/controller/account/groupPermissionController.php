@@ -101,6 +101,14 @@ class GroupPermissionController extends Controller
     ]);
   }
 
+  /**
+   * Add single permission into collumn `users_group.permission`
+   * 
+   * @endpoint POST api=account/group-permission/add-permission?token=<>
+   * @param string $data['name'] group name
+   * @param string $permission permission json string
+   * @access public
+   */
   public function addPermission() {
 
     if ($this->http->method() != 'POST') {

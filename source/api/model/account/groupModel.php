@@ -150,6 +150,12 @@ class GroupModel extends BaseModel
         ])->rowsCount();
     }
 
+    /**
+     * Add a permission into table `users_group`, column `permission`
+     * 
+     * @access public
+     * @param string[] contains properties 'name' (group name) && 'permission'
+     */
     public function addPermission(Array $data) {
         $sql_permission = "SELECT `permission` FROM `" . DB_PREFIX . "users_group` WHERE name = :name";
         $permission = $this->db->query($sql_permission, [
