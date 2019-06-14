@@ -5,6 +5,9 @@
  * 
  * (c) All rights reserved, Lam Nguyen | lam.nguyen.mr@outlook.com
  * 
+ * 401	Unauthorized
+ * 403	Forbidden
+ * 404	Not Found
  * Product: MVC API Package
  */
 
@@ -44,6 +47,15 @@ class PublicController extends Controller {
      */
     public function list() {
         $errors = [];
+
+        if ($this->http->method() != 'GET') {
+            $this->json->sendBack([
+                'success'   => false,
+                'message'   => 'This API only supports method GET'
+            ]);
+            return;
+        }
+
         $is_logged = $this->user->isTokenValid($_GET['token']);
 
         if (!$is_logged) {
@@ -83,5 +95,67 @@ class PublicController extends Controller {
                 'message' => $errors
             ]);
         }  
+    }
+
+    /**
+     * Add a menu
+     * 
+     * @endpoint POST  api=menu/public/create&token=<>
+     * @param string filter string to filter
+     * @param string name name of group
+     * @param number order 
+     * @param string[] children
+     * @param boolean  enable
+     */
+    public function create() {
+
+        if ($this->http->method() != 'POST') {
+            
+            $this->json->sendBack([
+                'success'   => false,
+                'code'      => 403,
+                'message'   => 'This API only supports method POST'
+            ]);
+            return;
+        }
+
+        $get_data = $this->http->data('GET');
+        if ($this->user->isTokenValid($get_data['token'])) {
+            $this->model->load("menu/menu");
+            $post_data = $this->http->data('POST');
+
+            if (!empty($post_data['children']) && !is_string($post_data['children'])) {
+                $this->json->sendBack([
+                    'success'   => false,
+                    'code'      => 403,
+                    'message'   => 'parameter children must be string type'
+                ]);
+
+                return;
+            }
+            $post_data['children'] = str_replace(' ', '', $post_data['children']);
+
+            $response = $this->model->menu->addNewMenu($post_data);
+
+            if($response['success']) {
+                $this->json->sendBack([
+                    'success'   => true,
+                    'message'   => 'Successfully add new menu'
+                ]);
+                return;
+            }
+            
+            $this->json->sendBack([
+                'success'   => false,
+                'message'   => $response['message']
+            ]);
+            return;
+        }
+
+        $this->json->sendBack([
+            'success'   => false,
+            'code'      => 401,
+            'message'   => 'Token is invalid'
+        ]);
     }
 }

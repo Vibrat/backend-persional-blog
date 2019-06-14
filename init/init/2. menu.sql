@@ -10,6 +10,7 @@ CREATE TABLE `menu` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `category` varchar(255) DEFAULT '',
   `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `children` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `is_init` tinyint(11) NOT NULL DEFAULT '0',
   `order` tinyint(11) NOT NULL DEFAULT '0',
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
