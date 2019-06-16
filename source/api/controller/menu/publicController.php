@@ -214,4 +214,38 @@ class PublicController extends Controller {
             'message'   => 'Token is invalid'
         ]);
     }
+
+    /**
+     * Update a menu
+     * 
+     * @endpoint PUT api=menu/public/update?token=<>
+     * @param string name: name of menu to update information
+     * @param string category: category information to update
+     * @param number order: number type string 
+     * @param string children: string delimited by comma
+     * @param number enable: 1 | 0 
+     */
+    public function update() {
+        if ($this->http->method() != 'PUT') {
+            $this->json->sendBack([
+                'success'   => false,
+                'code'      => 403,
+                'message'   => 'This API only supports method PUT'
+            ]);
+            return;
+        }
+
+        $get_data = $this->http->data('GET');
+        if ($this->user->isTokenValid($get_data['token'])) {
+            $put_data = $this->http->data('PUT');
+            
+            return;
+        } 
+
+        $this->json->sendBack([
+            'success'   => false,
+            'code'      => 401,
+            'message'   => 'Token is invalid'
+        ]);
+    }
 }

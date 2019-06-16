@@ -125,6 +125,26 @@ class MenuModel extends BaseModel {
             'success'   => true,
             'data'      =>$query->row()
         ];
+    }
 
+    /**
+     * Update a record in table 'menu'
+     * 
+     * @param string name: name of menu to update information
+     * @param string category: category information to update
+     * @param number order: number type string 
+     * @param string children: string delimited by comma
+     * @param number enable: 1 | 0 
+     */
+    public function updateMenu($data) {
+        $sql_count_menu = "SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "menu` WHERE :name = :name LIMIT 1";
+        
+        $counts_menu = $this->db->query($sql_count_menu, [
+            ':name'     => $data['name']
+        ])->row('total');
+        
+        if ($counts_menu) {
+
+        }
     }
 }
