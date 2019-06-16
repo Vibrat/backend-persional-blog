@@ -237,8 +237,23 @@ class PublicController extends Controller {
 
         $get_data = $this->http->data('GET');
         if ($this->user->isTokenValid($get_data['token'])) {
+            $this->model->load('menu/menu');
             $put_data = $this->http->data('PUT');
+
+            $response = $this->model->menu->updateMenu($put_data);
             
+            if ($response) {
+                $this->json->sendBack([
+                    'success'   => true,
+                    'message'   => 'Successfully update menu'
+                ]);
+                return;
+            }
+            
+            $this->json->sendBack([
+                'success'   => false,
+                'message'   => 'There is an error trying to update menu'
+            ]);
             return;
         } 
 

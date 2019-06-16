@@ -134,9 +134,17 @@ class MenuModel extends BaseModel {
      * @param string category: category information to update
      * @param number order: number type string 
      * @param string children: string delimited by comma
-     * @param number enable: 1 | 0 
+     * @param number is_init: 1 | 0 
      */
     public function updateMenu($data) {
+        $params = ['category', 'order', 'children', 'is_init'];
+        if (!isset($data['name'])) {
+            return [
+                'success'   => false,
+                'message'   => 'Parameter `name is missing`'
+            ];
+        }
+
         $sql_count_menu = "SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "menu` WHERE :name = :name LIMIT 1";
         
         $counts_menu = $this->db->query($sql_count_menu, [
@@ -144,7 +152,29 @@ class MenuModel extends BaseModel {
         ])->row('total');
         
         if ($counts_menu) {
+            $sql_update_menu = "UPDATE `" . DB_PREFIX . "menu` SET ";
+            $bind_params = [];
 
+            foreach($params as $key) {
+                if (isset($data[$key])) {
+                    $sql_update_menu .= "`" . $key . "` = :" . $key . "";
+                    if (next($params)) {
+                        $sql_update_menu .= ', ';
+                    }
+                    
+                    $bind_params = array_merge($bind_params, [
+                        ':' . $key => $data[$key]
+                        ]);
+                }
+            }
+
+            $sql_update_menu .= " WHERE `name` = :name";
+            $query = $this->db->query($sql_update_menu, 
+                array_merge([
+                    ':name' => $data['name']
+                ], $bind_params));
+            
+            return $query->rowsCount();
         }
     }
 }
