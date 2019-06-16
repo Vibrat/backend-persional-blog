@@ -264,4 +264,38 @@ class PublicController extends Controller {
             'message'   => 'Token is invalid'
         ]);
     }
+
+    /**
+     * Delete a menu
+     * 
+     * @endpoint DELETE api=menu/public/delete&name=<>&token=<>
+     * @param string token
+     * @param string name: name of menu to be deleted
+     */
+    public function delete() {
+        if ($this->http->method() != 'DELETE') {
+            $this->json->sendBack([
+                'success'   => false,
+                'code'      => 403,
+                'message'   => 'This API only supports method DELETE'
+            ]);
+            return;
+        }
+
+        $get_data = $this->http->data('GET');
+        if($this->user->isTokenValid($get_data['token'])) {
+            $this->model->load('menu/menu');
+            
+            $response = $this->model->menu->deleteMenu($get_data['name']);
+            $this->json->sendBack($response);
+
+            return;
+        }
+
+        $this->json->sendBack([
+            'success'   => false,
+            'code'      => 401,
+            'message'   => 'Token is invalid'
+        ]);
+    }
 }

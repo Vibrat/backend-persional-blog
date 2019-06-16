@@ -187,4 +187,31 @@ class MenuModel extends BaseModel {
             'message'   => 'name ' . $data['name'] . ' doesn\'t exist'
         ];
     }
+
+    /**
+     * Delete a record in table menu
+     * 
+     * @param string name - name of a record
+     */
+    public function deleteMenu(String $name) {
+        
+        $sql = "DELETE FROM `" . DB_PREFIX . "menu` WHERE `name` = :name LIMIT 1";
+        $query = $this->db->query($sql, [
+            ':name' => $name
+        ]);
+
+        $affected_rows = $query->rowsCount();
+
+        if ($affected_rows) {
+            return [
+                'success'   => true,
+                'message'   => sprintf('successfully delete menu `%s`', $name)
+            ];
+        }
+
+        return [
+            'success'   => false,
+            'message'   => sprintf('There is not menu named `%s`', $name)
+        ];
+    }
 }
