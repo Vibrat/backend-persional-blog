@@ -158,4 +158,60 @@ class PublicController extends Controller {
             'message'   => 'Token is invalid'
         ]);
     }
+
+    /**
+     * Read details of a menu
+     * 
+     * @endpoint GET api=menu/public/read&token=<>&name=<>
+     * @param string token
+     * @param string api
+     * @param string name - Group Name to get information
+     */
+    public function read() {
+        if ($this->http->method() != 'GET') {
+            
+            $this->json->sendBack([
+                'success'   => false,
+                'code'      => 403,
+                'message'   => 'This API only supports method GET'
+            ]);
+            return;
+        }
+
+        $get_data = $this->http->data('GET');
+
+        if ($this->user->isTokenValid($get_data['token'])) {
+
+            if (!isset($get_data['name'])) {
+                $this->json->sendBack([
+                    'success'   => false,
+                    'message'   => 'parameter name does not exist'
+                ]);
+                return;
+            }
+            
+            $this->model->load('menu/menu');
+            $response  = $this->model->menu->readMenu($get_data['name']);
+
+            if ($response['success']) {
+                $this->json->sendBack([
+                    'success'   => true,
+                    'data'      => $response['data'] ? $response['data'] : []
+                ]);
+                return;
+            } 
+
+            $this->json->sendBack([
+                'success'   => false,
+                'message'   => $response['message']
+            ]);
+            return;
+        }
+
+        $this->json->sendBack([
+            'success'   => false,
+            'code'      => 401,
+            'message'   => 'Token is invalid'
+        ]);
+    }
 }

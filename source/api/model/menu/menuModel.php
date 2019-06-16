@@ -101,6 +101,30 @@ class MenuModel extends BaseModel {
             'success'   => false,
             'message'      => $errors
         ];
+    }
+
+    /**
+     * Read a menu from table `menu`
+     * 
+     * @param string $name name of menu to query
+     */
+    public function readMenu($name) {
+        if (!is_string($name)) {
+            return [
+                'success'   => false,
+                'message'   => '$name is not a valid string'
+            ];
+        }
+
+        $sql = "SELECT `category`, `name`, `children`, `is_init`, `order` FROM `" . DB_PREFIX . "menu` WHERE name = :name LIMIT 1";
+        $query = $this->db->query($sql, [
+            ':name' => $name
+        ]);
+        
+        return [
+            'success'   => true,
+            'data'      =>$query->row()
+        ];
 
     }
 }
