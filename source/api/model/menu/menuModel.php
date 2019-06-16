@@ -137,6 +137,7 @@ class MenuModel extends BaseModel {
      * @param number is_init: 1 | 0 
      */
     public function updateMenu($data) {
+        // parameters that are allowed in this method
         $params = ['category', 'order', 'children', 'is_init'];
         if (!isset($data['name'])) {
             return [
@@ -145,12 +146,13 @@ class MenuModel extends BaseModel {
             ];
         }
 
-        $sql_count_menu = "SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "menu` WHERE :name = :name LIMIT 1";
-        
+        // Check if record already exists
+        $sql_count_menu = "SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "menu` WHERE `name` = :name LIMIT 1";
         $counts_menu = $this->db->query($sql_count_menu, [
             ':name'     => $data['name']
         ])->row('total');
         
+        // Start Update information
         if ($counts_menu) {
             $sql_update_menu = "UPDATE `" . DB_PREFIX . "menu` SET ";
             $bind_params = [];
@@ -174,7 +176,15 @@ class MenuModel extends BaseModel {
                     ':name' => $data['name']
                 ], $bind_params));
             
-            return $query->rowsCount();
+            return [
+                'success'   => true,
+                'data' => $query->rowsCount()
+            ];
         }
+
+        return [
+            'success'   => false,
+            'message'   => 'name ' . $data['name'] . ' doesn\'t exist'
+        ];
     }
 }

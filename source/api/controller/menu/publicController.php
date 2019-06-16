@@ -241,10 +241,10 @@ class PublicController extends Controller {
             $put_data = $this->http->data('PUT');
 
             $response = $this->model->menu->updateMenu($put_data);
-            
-            if ($response) {
+            if ($response['success']) {
                 $this->json->sendBack([
                     'success'   => true,
+                    'code'      => 200,
                     'message'   => 'Successfully update menu'
                 ]);
                 return;
@@ -252,7 +252,8 @@ class PublicController extends Controller {
             
             $this->json->sendBack([
                 'success'   => false,
-                'message'   => 'There is an error trying to update menu'
+                'code'      => 403,
+                'message'   => $response['message']
             ]);
             return;
         } 
