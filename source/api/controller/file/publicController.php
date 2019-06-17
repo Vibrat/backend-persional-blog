@@ -40,4 +40,51 @@ class PublicController extends Controller {
             'message'   => 'Forbidden'
         ]);
     }
+
+    /**
+     * Upload a file
+     * 
+     * @endpoing POST api=file/public/upload&token=<>
+     * @param string name - name of file to be changed to
+     * @param File file file that is uploaded
+     */
+    public function upload() {
+
+        if ($this->http->method() != 'POST') {
+            $this->json->sendBack([
+                'success'   => false,
+                'code'      => 403,
+                'message'   => 'This API only supports method POST'
+            ]);
+            return;
+        }
+
+        $get_data = $this->http->data('GET');
+        if ($this->user->isTokenValid($get_data['token'])) {
+            $this->file->allow_types([
+                'application/pdf',
+                'text/css',
+                'text/html',
+                'text/xml',
+                'text/csv',
+                'text/plain',
+                'image/png',
+                'image/jpeg',
+                'image/gif'
+            ]);
+
+            if ($this->file->validate($_FILES['file'])) {
+                $this->file->move($_FILES['file'], dirname(__FILE__));
+            
+            }
+
+            return;
+        }
+
+        $this->json->sendBack([
+            'success'   => false,
+            'code'      => 401,
+            'message'   => 'Token is invalid'
+        ]);
+    }
 } 
