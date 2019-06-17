@@ -9,6 +9,9 @@
 
   use Engine\App\App as Application;
 
+  ## Add Polyfill
+  require_once "./polyfill.php";
+
   ## load config
   if (file_exists('./config.php')) {
       require_once './config.php';

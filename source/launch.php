@@ -9,7 +9,6 @@ use Token\Token;
 use Vendor\Apier\Apier;
 use beFunc\beFunc as Befunc;
 use Http\DataSubmit;
-use TheSeer\Tokenizer\Exception;
 
 session_start([
     'cookie_lifetime' => 86400,
@@ -40,6 +39,9 @@ $engine->set('db',
             'port'     => DB_PORT    
         ]
     ));
+
+## HttpFileHandler
+$engine->set('file', new HttpFileHandler());
 
 ## init architecture
 $engine->set('model', new Model(['db' => $engine->db]));
@@ -72,6 +74,7 @@ try {
 $engine->router->load(
     $engine->router->getLoadFiles(), 
     [
+        'file'      => $engine->file,
         'db'        => $engine->db,
         'json'      => $engine->json,
         'model'     => $engine->model,
