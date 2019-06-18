@@ -55,7 +55,7 @@ class HttpFileHandler {
      * Move file 
      * 
      * @param string $file
-     * @param string $to
+     * @param string $to contains filename
      * @return boolean
      */
     public function move(Array $file, String $to) {

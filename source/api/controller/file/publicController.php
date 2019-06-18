@@ -59,7 +59,9 @@ class PublicController extends Controller {
             return;
         }
 
-        $get_data = $this->http->data('GET');
+        $get_data  = $this->http->data('GET');
+        $post_data = $this->http->data('POST');
+
         if ($this->user->isTokenValid($get_data['token'])) {
             $this->file->allow_types([
                 'application/pdf',
@@ -73,12 +75,31 @@ class PublicController extends Controller {
                 'image/gif'
             ]);
 
-            if ($this->file->validate($_FILES['file'])) {
-                $this->file->move($_FILES['file'], dirname(__FILE__));
-            
+            $validated_file = $this->file->validate($_FILES['file']);
+            if (isset($validated_file['success']) && !$validated_file['success']) {
+                $this->json->sendBack([
+                    'success'   => false,
+                    'message'   => $validated_file['message']
+                ]);
+                return;
             }
 
-            return;
+            try {
+                $filename = (isset($post_data['name']) ? $post_data['name'] : $validated_file['name']);
+                $new_location = implode("/", [dirname(__FILE__), $filename]);
+                $this->file->move($validated_file, $new_location);  
+                
+                $validated_file['location'] = $new_location;
+                $this->json->sendBack([
+                    'success'   => true,
+                    'data'      => $validated_file
+                ]);
+            } catch (\Exception $e) {
+                $this->json->sendBack([
+                    'success'   => false,
+                    'message'   => $e->getMessage()
+                ]);
+            }
         }
 
         $this->json->sendBack([
