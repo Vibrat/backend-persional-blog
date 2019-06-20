@@ -13,7 +13,7 @@ class HttpFileHandler {
      * @see https://en.wikipedia.org/wiki/Media_type#Type_application
      */
     public function allow_types(Array $allowed_types, Number $max_size = null) {
-        $this->allow_types = $allowed_types;
+        $this->allowed_types = $allowed_types;
         $this->allowed_size = $max_size;
     }
 

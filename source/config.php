@@ -5,6 +5,7 @@ define("DIR_PATH", dirname(__FILE__) . "/");
 ## Define Common Dirs
 define("SYSTEM_DIR",    DIR_PATH . "system/");
 define("ENGINE_DIR",    SYSTEM_DIR . "engine/");
+define("STORAGE_API",   DIR_PATH . "storage/api/");
 define("LIBRARY_DIR",   SYSTEM_DIR . "library/");
 define("MODEL_DIR",     SYSTEM_DIR . "model/");
 define("VENDOR_DIR",    SYSTEM_DIR . "vendor/");

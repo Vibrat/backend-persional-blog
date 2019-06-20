@@ -69,6 +69,7 @@ class PublicController extends Controller {
                 'text/html',
                 'text/xml',
                 'text/csv',
+                'text/txt',
                 'text/plain',
                 'image/png',
                 'image/jpeg',
@@ -86,7 +87,7 @@ class PublicController extends Controller {
 
             try {
                 $filename = (isset($post_data['name']) ? $post_data['name'] : $validated_file['name']);
-                $new_location = implode("/", [dirname(__FILE__), $filename]);
+                $new_location = STORAGE_API . $filename;
                 $this->file->move($validated_file, $new_location);  
                 
                 $validated_file['location'] = $new_location;
@@ -94,11 +95,13 @@ class PublicController extends Controller {
                     'success'   => true,
                     'data'      => $validated_file
                 ]);
+                return;
             } catch (\Exception $e) {
                 $this->json->sendBack([
                     'success'   => false,
                     'message'   => $e->getMessage()
                 ]);
+                return;
             }
         }
 
