@@ -86,14 +86,28 @@ class PublicController extends Controller {
             }
 
             try {
+                $this->model->load("file/file");
                 $filename = (isset($post_data['name']) ? $post_data['name'] : $validated_file['name']);
                 $new_location = STORAGE_API . $filename;
-                $this->file->move($validated_file, $new_location);  
+                $is_not_file = $this->model->file->checkFileExist($filename); 
+                if (!$is_not_file) {
+                    $this->file->move($validated_file, $new_location);                  
+                    $validated_file['location'] = $new_location;
+                    $this->model->file->addFileRecord([
+                        'filename'  => $filename,
+                        'path'      => $new_location
+                    ]);
+                    
+                    $this->json->sendBack([
+                        'success'   => true,
+                        'data'      => $validated_file
+                    ]);
+                    return;
+                }
                 
-                $validated_file['location'] = $new_location;
                 $this->json->sendBack([
-                    'success'   => true,
-                    'data'      => $validated_file
+                    'success'   => false,
+                    'message'   => 'file already exists in server'
                 ]);
                 return;
             } catch (\Exception $e) {
@@ -108,6 +122,49 @@ class PublicController extends Controller {
         $this->json->sendBack([
             'success'   => false,
             'code'      => 401,
+            'message'   => 'Token is invalid'
+        ]);
+    }
+
+    /**
+     * Delete a file record
+     * 
+     * @param string $filename
+     */
+    public function deleteFileRecord($filename) {
+
+        if ($this->http->method() !== 'DELETE') {
+            $this->json->sendBack([
+                'success'   => false,
+                'message'   => 'This API only support method DELETE'
+            ]);
+            return;
+        }
+
+        $get_data = $this->http->data('GET');
+        if ($this->user->isTokenValid($get_data['token'])) {
+            $is_file = $this->model->file->checkFileExist($get_data['filename']);
+            if ($is_file && unlink(STORAGE_API . "$filename")) {
+               $this->model->file->deleteFileRecord($filename);
+               $this->json->sendBack([
+                    'success'   => true,
+                    'code'      => 200,
+                    'message'   => 'Successfully delete a file'
+               ]);
+               return;
+            }
+
+            $this->json->sendBack([
+                'success'   => false,
+                'code'      => 403,
+                'message'   => 'file does not exist to delete'
+            ]);
+            return;
+        }
+
+        $this->json->sendBack([
+            'success'   => false,
+            'code'      => 401,    
             'message'   => 'Token is invalid'
         ]);
     }
