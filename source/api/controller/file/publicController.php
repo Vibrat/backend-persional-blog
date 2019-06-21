@@ -170,4 +170,11 @@ class PublicController extends Controller {
             'message'   => 'Token is invalid'
         ]);
     }
+
+    public function get() {
+        $get_data = $this->http->data('GET');
+        $file = STORAGE_API . $get_data['filename'];
+        header('Content-Type: image/png');
+        readfile($file);
+    }
 } 
