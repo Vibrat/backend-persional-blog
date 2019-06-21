@@ -131,11 +131,12 @@ class PublicController extends Controller {
      * 
      * @param string $filename
      */
-    public function deleteFileRecord($filename) {
+    public function delete() {
 
         if ($this->http->method() !== 'DELETE') {
             $this->json->sendBack([
                 'success'   => false,
+                'code'      => 403,
                 'message'   => 'This API only support method DELETE'
             ]);
             return;
@@ -143,9 +144,10 @@ class PublicController extends Controller {
 
         $get_data = $this->http->data('GET');
         if ($this->user->isTokenValid($get_data['token'])) {
+            $this->model->load('file/file');
             $is_file = $this->model->file->checkFileExist($get_data['filename']);
-            if ($is_file && unlink(STORAGE_API . "$filename")) {
-               $this->model->file->deleteFileRecord($filename);
+            if ($is_file && unlink(STORAGE_API . $get_data['filename'])) {
+               $this->model->file->deleteFileRecord($get_data['filename']);
                $this->json->sendBack([
                     'success'   => true,
                     'code'      => 200,

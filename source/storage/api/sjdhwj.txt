@@ -1,2 +1,0 @@
-action,id,name,enabled,phone1,phone2,mobile1,mobile2,email1,email2,teamid,usertype,pin,notes
-action 1,1,Lam Nguyen 1,active,123456789,,,,long1232@gmail.com,nguyenhoanglam229@gmail.com,,recipients,1010,something
