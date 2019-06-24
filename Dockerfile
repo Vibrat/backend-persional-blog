@@ -10,9 +10,17 @@ RUN a2enmod rewrite
 RUN docker-php-ext-install mysqli
 RUN docker-php-ext-install pdo pdo_mysql 
 
-## install mcrypt
+## installing gd - processing image
 RUN apt-get update \
-    && apt-get install libmcrypt-dev -y libreadline-dev
+    && apt-get install libmcrypt-dev -y libreadline-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev \
+    && docker-php-ext-install -j$(nproc) iconv \
+    && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
+    && docker-php-ext-install -j$(nproc) gd
+
+
+# RUN apt-get update  \ 
+#     && docker-php-ext-install gd
+
 # RUN apt-get update  \
 #     && docker-php-ext-install mcrypt
 RUN pecl install xdebug-2.7.2 && docker-php-ext-enable xdebug

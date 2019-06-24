@@ -171,10 +171,94 @@ class PublicController extends Controller {
         ]);
     }
 
+    /**
+     * Provide way to access to image resource
+     * 
+     * https://www.php.net/manual/en/function.imagecreatefrompng.php
+     * @endpoint GET api=file/file/get&width=<>&height=<>
+     * @return image 
+     */
     public function get() {
-        $get_data = $this->http->data('GET');
-        $file = STORAGE_API . $get_data['filename'];
-        header('Content-Type: image/png');
-        readfile($file);
+
+        if ($this->http->method() != 'GET') {
+            $this->json->sendBack([
+                'success'   => false,
+                'code'      => 403,
+                'message'   => 'This API only support method GET'
+            ]);
+            return;
+        }
+        
+        $this->model->load('file/file');
+
+        $get_data  = $this->http->data('GET');
+        $filename  = $get_data['filename'];
+        $file_path = STORAGE_API . $filename;
+        $modified_width  = isset($get_data['width']) ? (int) $get_data['width'] : $img['width'];
+        $modified_height = isset($get_data['height']) ? (int) $get_data['height'] : $img['height'];
+
+        if ($this->model->file->checkFileExist($filename)) {
+            $img = $this->imageFactory(STORAGE_API, $filename);
+            $font_path = dirname(__FILE__) . "/_font/Roboto-Black.ttf";
+            $img_d = imagecreatetruecolor($modified_width, $modified_height);
+
+            if (!$img) {
+                header('Content-Type: ' . $img['extension']);
+                imagecopyresized($img_d, $img['image'], 0, 0, 0, 0, $modified_width, $modified_height, $img['width'], $img['height']);
+                str_replace("/", "", $img['extension'])($img_d);
+            } else { 
+                $black = imagecolorallocate($img_d, 0, 0, 0);
+                $white = imagecolorallocate($img_d, 255, 255, 255);
+
+                imagefill($img_d, 0, 0, $white);
+                imagefttext($img_d, 20, 0, ($modified_width -20*(strlen('Not found')))/2 , $modified_height/2 + 10, $black, $font_path, 'Not found');
+
+                header('Content-Type: image/jpeg');
+                imagejpeg($img_d);
+            }
+
+            imagedestroy($img_d);
+            return;
+        }
+
+        $this->json->sendBack([
+            'success'   => false,
+            'message'   => 'Image does exist in server'
+        ]);
+    }
+
+    /**
+     * Factory to produce image
+     * 
+     */
+    private function imageFactory($path, $filename) {
+        $img = false;
+        $extension = false;
+        $extension = mime_content_type($path . $filename); // Return true extension of a file
+
+        switch($extension) {
+            case 'image/png': 
+                $img = imagecreatefrompng($path . $filename);
+                [$width, $height, $others] = getimagesize($path . $filename);
+                break;
+            case 'image/jpeg':
+                $img = imagecreatefromjpeg($path . $filename);
+                [$width, $height, $others] = getimagesize($path . $filename);
+                break;
+        }
+
+        $data = [
+            'name'          => $filename,
+            'extension'     => $extension, 
+            'image'         => $img,
+            'width'         => $width,
+            'height'        => $height    
+        ];
+
+        if (!in_array(false, $data)) {
+            return $data;
+        }
+
+        return false;
     }
 } 
