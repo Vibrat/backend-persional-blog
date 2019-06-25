@@ -135,4 +135,54 @@
             'message'   => 'Token is invalid'
         ]);
     }
+
+
+    /**
+     * Get a blog record
+     * 
+     * @endpoint GET api=blog/public/get&id=<>&token=<>
+     * @param string id - id of blog
+     * @param string token
+     */
+    public function get() {
+
+        if ($this->http->method() != 'GET') {
+
+            $this->json->sendBack([
+                'success'   => false,
+                'code'      => 403,
+                'message'   => 'This API only support method GET'
+            ]);
+            return;
+        }
+
+        $get_data = $this->http->data('GET');
+        if($this->user->isTokenValid($get_data['token'])) {
+            $this->model->load('blog/blog');
+
+            $response = $this->model->blog->getARecord($get_data['id']);
+            if ($response['success']) {
+                
+                $this->json->sendBack([
+                    'success'   => true,
+                    'code'      => 200,
+                    'data'      => $response['data']
+                ]);
+                return;
+            }
+
+            $this->json->sendBack([
+                'success'   => false,
+                'code'      => 403,
+                'message'   => $response['message']
+            ]);
+            return;
+        }
+
+        $this->json->sendBack([
+            'success'   => false,
+            'code'      => 401,
+            'message'   => 'Token is invalid'
+        ]);
+    }   
  }

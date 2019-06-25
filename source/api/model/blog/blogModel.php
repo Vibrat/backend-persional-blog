@@ -121,4 +121,30 @@
             'message'   => 'Parameter id is not string type'
         ];
     }
+
+    /**
+     * Get a row in table blog
+     * 
+     * @param string $id
+     */
+    public function getARecord($id) {
+        if (is_String($id)) {
+            
+            $sql = "SELECT * FROM `" . DB_PREFIX . "blog` WHERE `id` = :id LIMIT 1";
+            $query = $this->db->query($sql, [
+                ':id'   => $id
+            ]);
+
+            return  [
+                'success'   => true,
+                'data'      => $query->rows()
+            ];
+
+        }
+
+        return [
+            'success'   => false,
+            'message'   => 'Parameter id is not string type'
+        ];
+    }
  }
