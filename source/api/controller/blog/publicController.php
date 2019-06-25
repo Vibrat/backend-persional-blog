@@ -184,5 +184,21 @@
             'code'      => 401,
             'message'   => 'Token is invalid'
         ]);
-    }   
+    }
+    
+     
+    public function list() {
+     
+        if ($this->http->method() != 'GET') {
+            $this->json->sendBack([
+                'success'   => false,
+                'code'      => 403, 
+                'message'   => 'This API onlsy supports method GET'
+            ]);
+            return;
+        }
+
+        $get_data = $this->http->data('GET');
+        
+    }
  }

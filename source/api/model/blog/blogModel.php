@@ -147,4 +147,29 @@
             'message'   => 'Parameter id is not string type'
         ];
     }
+
+    /**
+     * List data from table `blog`
+     * 
+     * @param number limit
+     * @param number offset
+     */
+    public function listRecords($data) {
+        if (is_numeric($data['offset'] 
+            && is_numeric($data['limit']))) {
+
+            $sql = "SELECT * FROM `" . DB_PREFIX . "blog` LIMIT " . $data['offset'] .", " . $data['limit'] . "";
+            $query = $this->db->query($sql);
+
+            return [
+                'success'   => true,
+                'data'      => $query->rows()
+            ];
+        }
+
+        return [
+            'success'   => false,
+            'message'   => 'Parameter `offset` or `limit` is not number type'
+        ];
+    }
  }
