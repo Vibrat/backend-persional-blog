@@ -153,17 +153,79 @@
      * 
      * @param number limit
      * @param number offset
+     * @param string tags
+     * @param string category
+     * @param timestamp timestamp
      */
     public function listRecords($data) {
-        if (is_numeric($data['offset'] 
-            && is_numeric($data['limit']))) {
 
-            $sql = "SELECT * FROM `" . DB_PREFIX . "blog` LIMIT " . $data['offset'] .", " . $data['limit'] . "";
-            $query = $this->db->query($sql);
+        // split and filter tags
+        if (isset($data['tags']) 
+            && is_string($data['tags'])) {
+            foreach(explode(",", $data['tags']) as  $key=>$tag) {
+                if  (!empty($tag = trim($tag))) {
+                    $tags[':tag' . $key] = $tag;
+                }
+            }
+        } else {
+            $tags = [];
+        }
+
+        // split and filter category
+        if (isset($data['category']) 
+            && is_string($data['category'])) {
+            foreach(explode(",", $data['category']) as $key=>$category) {
+                if(!empty($category = trim($category))) {
+                    $categories[':category' . $key ] = $category;
+                }
+            }
+        } else {
+            $categories = [];
+        }
+
+        $timestamp = isset($data['timestamp']);
+
+        if (is_numeric($data['offset']) 
+            && is_numeric($data['limit'])) {
+
+            $sql = "SELECT * FROM `" . DB_PREFIX . "blog`";
+            $sql_count = "SELECT COUNT(*) as total FROM `" . DB_PREFIX . "blog`";
+
+            $sql_regex_data = [];
+            $sql_data = array_merge($tags, $categories);
+            $sql .= (!empty($sql_data) ? " WHERE" : "");
+            $sql_count .= (!empty($sql_data) ? " WHERE" : "");
+
+            if (!empty($tags)) {
+                
+                $regexp = "^(.*" . implode("[,$]|.*", array_values($tags)) ."[,$])";
+                $sql_regex_data ['tag'] = $regexp;
+                $sql .= " `tags` REGEXP :tag";
+                $sql_count .= " `tags` REGEXP :tag";
+            }
+
+            if (!empty($categories)) {
+                $sql .= (!empty($tags) ? " AND" : "");
+                $sql_count .= (!empty($tags) ? " AND" : "");
+                $regexp = "^(.*" . implode("[,$]|.*", array_values($categories)) . "[,$])";
+                $sql_regex_data['categories'] = $regexp;
+                $sql .= " `category` REGEXP :categories";
+                $sql_count .= " `category` REGEXP :categories";
+                
+            }
+
+            $sql .= ($timestamp ? " ORDER BY `timestamp`" : "");
+            $sql .= " LIMIT " . $data['offset'] .", " . $data['limit'] . "";
+            
+            $query_data = $this->db->query($sql, $sql_regex_data)->rows();
+            $query_data_count = $this->db->query($sql_count, $sql_regex_data)->row('total');
 
             return [
                 'success'   => true,
-                'data'      => $query->rows()
+                'data'      => $query_data,
+                'total'     => $query_data_count,
+                'limit'     => $data['limit'],
+                'offset'    => $data['offset']
             ];
         }
 

@@ -186,9 +186,19 @@
         ]);
     }
     
-     
+    /**
+      * List records in table `blog`
+      * 
+      * @endpoint GET api=blog/public/list&limit=<>&offset=<>0&category=<>&timestamp&tags=<> 
+      * @param number limit
+      * @param number offset
+      * @param string category
+      * @param string tags
+      * @param null timestamp
+      */
     public function list() {
      
+        // Checking allowed method
         if ($this->http->method() != 'GET') {
             $this->json->sendBack([
                 'success'   => false,
@@ -200,5 +210,19 @@
 
         $get_data = $this->http->data('GET');
         
+        // Allow to only query 100 articles at a time 
+        if (!isset($data['limit']) || $get_data['limit'] > 100 ) {
+            $get_data['limit'] = 100;
+        } 
+
+        $this->model->load('blog/blog');
+        $response = $this->model->blog->listRecords($get_data);
+
+        $this->json->sendBack([
+            'success'   => true,
+            'code'      => 200,
+            'data'      => $response
+        ]);
+        return;
     }
  }
