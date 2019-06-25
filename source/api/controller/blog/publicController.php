@@ -57,9 +57,28 @@
             return;
         }
 
-        $get_data = $this->htt->data('GET');
+        $get_data = $this->http->data('GET');
         if ($this->user->isTokenValid($get_data['token'])) {
             
+            $this->model->load("blog/blog");           
+            $post_data = $this->http->data('POST');
+            $response = $this->model->blog->addNewRecord($post_data);
+
+            if ($response['success']) {
+
+                $this->json->sendBack([
+                    'success'   => true,
+                    'code'      => 200,
+                    'message'   => 'Successfully create a blog article'
+                ]);
+                return;
+            }
+
+            $this->json->sendBack([
+                'success'   => false,
+                'code'      => 403,
+                'message'   => $response['message']
+            ]);
             return;
         }
 

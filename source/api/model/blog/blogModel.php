@@ -45,9 +45,43 @@
                 'message'   => $e->getMessage()
             ];
         }
+
+        ## Count numbers of title
+        $sql_count_title     = "SELECT COUNT(*) as total FROM `" . DB_PREFIX ."blog` WHERE `title` = :title LIMIT 1"; 
+        if ($this->db->query($sql_count_title, [
+            ':title'    => $data['title']
+        ])->row('total')) {
+            return [
+                'success'   => false,
+                'message'   => 'There is already an article named ' . $data['title']
+            ];
+        }
+
+        ## Count number of seo title
+        $sql_count_seo_title = "SELECT COUNT(*) as total FROM `" . DB_PREFIX . "blog` WHERE `seo_title` = :seo_title LIMIT 1";
+        if ($this->db->query($sql_count_seo_title, [
+            ':seo_title'    => $data['seo_title']
+        ])->row('total')) {
+            return [
+                'success'   => false,
+                'message'   => 'There is already an article has seo_title as ' . $data['seo_title']
+            ];
+        }
+
+        ## Count number of seo url
+        $sql_count_seo_url   = "SELECT COUNT(*) as total FROM `" . DB_PREFIX . "blog` WHERE `seo_url` = :seo_url LIMIT 1";
+        if ($this->db->query($sql_count_seo_url, [
+            ':seo_url'      => $data['seo_url']
+        ])->row('total')) {
+            return [
+                'success'   => false,
+                'message'   => 'There is already an article with seo_url as ' . $data['seo_url']
+            ];
+        }
        
-        $sql = "INSERT INTO `blog` (`title`, `des`, `tags`, `category`, `seo_title`, `seo_des`, `seo_url`) VALUES (:title, :des, :tags, :category, :seo_title, :seo_des, :seo_url)";
-        $query = $this->db->query(sql, [
+        ## Insert a record into table blog
+        $sql   = "INSERT INTO `" . DB_PREFIX . "blog` (`title`, `des`, `tags`, `category`, `seo_title`, `seo_des`, `seo_url`) VALUES (:title, :des, :tags, :category, :seo_title, :seo_des, :seo_url)";
+        $query = $this->db->query($sql, [
             ':title'        => $data['title'],
             ':des'          => $data['des'],
             ':tags'         => $data['tags'],
@@ -57,6 +91,9 @@
             ':seo_url'      => $data['seo_url']
         ]);
 
-        return $query->rows();
+        return [
+            'success'       => true, 
+            'data'          => $query->rowsCount()
+        ];
     }
  }
