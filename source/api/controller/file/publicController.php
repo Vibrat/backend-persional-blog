@@ -73,7 +73,8 @@ class PublicController extends Controller {
                 'text/plain',
                 'image/png',
                 'image/jpeg',
-                'image/gif'
+                'image/gif',
+                'image/jpg'
             ]);
 
             $validated_file = $this->file->validate($_FILES['file']);

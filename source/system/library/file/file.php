@@ -6,6 +6,15 @@
 class HttpFileHandler {
     private $allowed_types = [];
     private $allowed_size  = null;
+    private $errors = [
+        '1'     => 'file size exceeds allowed size',
+        '2'     => 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form.',
+        '3'     => 'The uploaded file was only partially uploaded.',
+        '4'     => 'No file was uploaded.',
+        '6'     => 'Missing a temporary folder',
+        '7'     => 'Failed to write file to disk',
+        '8'     => ' PHP extension stopped the file upload'  
+    ];
 
     /**
      * Add allowed extensions
@@ -27,6 +36,14 @@ class HttpFileHandler {
      * @return $file
      */
     public function validate($file) {
+        
+        if ($file['error']) {
+            return [
+                'success'   => false,
+                'message'   => $this->errors[$file['error']]
+            ];
+        }
+
         if (!in_array($file['type'], $this->allowed_types)) {
             return [
                 'success'   => false,
@@ -38,13 +55,6 @@ class HttpFileHandler {
             return [
                 'success'   => false,
                 'message'   => 'file size exceeds permitted value'
-            ];
-        }
-
-        if ($file['error']) {
-            return [
-                'success'   => false,
-                'message'   => $file['error']
             ];
         }
 
