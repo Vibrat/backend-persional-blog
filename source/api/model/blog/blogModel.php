@@ -96,4 +96,29 @@
             'data'          => $query->rowsCount()
         ];
     }
+
+    /**
+     * Delete a row in table `blog`
+     * 
+     * @param string $id 
+     */
+    public function deleteARecord($id) {
+        if (is_string($id)) {
+            
+            $sql = "DELETE FROM `" . DB_PREFIX . "blog` WHERE `id` = :id LIMIT 1";
+            $query = $this->db->query($sql, [
+                ':id'       => $id
+            ]);
+
+            return [
+                'success'   => true,
+                'data'      => $query->rowsCount()
+            ];
+        }
+
+        return [
+            'success'   => false,
+            'message'   => 'Parameter id is not string type'
+        ];
+    }
  }

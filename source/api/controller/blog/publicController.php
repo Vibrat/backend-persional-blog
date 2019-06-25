@@ -88,4 +88,51 @@
             'message'   => 'Token is invalid'
         ]);
     }
+
+    /**
+     * Delete a article
+     * 
+     * @endpoint DELETE api=blog/public/delete&id=<>&token=<>
+     * @param string id - blog id
+     * @param string token
+     */
+    public function delete() {
+
+        if  ($this->http->method() != 'DELETE') {
+
+            $this->json->sendBack([
+                'success'   => false,
+                'code'      => 403,
+                'message'   => 'This API only supports method DELETE'
+            ]);
+            return;
+        }
+
+        $get_data = $this->http->data('GET');
+        if ($this->user->isTokenValid($get_data['token'])) {
+            $this->model->load('blog/blog');
+            $response = $this->model->blog->deleteARecord($get_data['id']);
+            if ($response['success'] && $response['data']) {
+                $this->json->sendBack([
+                    'success'   => true,
+                    'code'      => 200,
+                    'message'   => 'Successfully delete a record'
+                ]);
+                return;
+            }
+            
+            $this->json->sendBack([
+                'success'   => false,
+                'code'      => 403,
+                'message'   => 'There is no article with id ' . $get_data['id'] 
+            ]);
+            return;
+        }
+
+        $this->json->sendBack([
+            'success'   => false,
+            'code'      => 401,
+            'message'   => 'Token is invalid'
+        ]);
+    }
  }
