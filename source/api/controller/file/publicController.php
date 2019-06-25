@@ -181,6 +181,7 @@ class PublicController extends Controller {
      */
     public function get() {
 
+        // Check method 
         if ($this->http->method() != 'GET') {
             $this->json->sendBack([
                 'success'   => false,
@@ -191,34 +192,40 @@ class PublicController extends Controller {
         }
         
         $this->model->load('file/file');
-
         $get_data  = $this->http->data('GET');
         $filename  = $get_data['filename'];
-        $file_path = STORAGE_API . $filename;
-        $modified_width  = isset($get_data['width']) ? (int) $get_data['width'] : $img['width'];
-        $modified_height = isset($get_data['height']) ? (int) $get_data['height'] : $img['height'];
 
         if ($this->model->file->checkFileExist($filename)) {
-            $img = $this->imageFactory(STORAGE_API, $filename);
-            $font_path = dirname(__FILE__) . "/_font/Roboto-Black.ttf";
-            $img_d = imagecreatetruecolor($modified_width, $modified_height);
+            
+            // factorize image
+            $original_img = $this->imageFactory(STORAGE_API, $filename);
+            
+            $modified_width  = isset($get_data['width']) ? (int) $get_data['width'] : $original_img['width'];
+            $modified_height = isset($get_data['height']) ? (int) $get_data['height'] : $original_img['height'];
+            $modified_img = imagecreatetruecolor($modified_width, $modified_height);
 
-            if (!$img) {
-                header('Content-Type: ' . $img['extension']);
-                imagecopyresized($img_d, $img['image'], 0, 0, 0, 0, $modified_width, $modified_height, $img['width'], $img['height']);
-                str_replace("/", "", $img['extension'])($img_d);
+            if ($original_img) {
+                
+                // Output resized image
+                header('Content-Type: ' . $original_img['extension']);
+                imagecopyresized($modified_img, $original_img['image'], 0, 0, 0, 0, $modified_width, $modified_height, $original_img['width'], $original_img['height']);
+                str_replace("/", "", $original_img['extension'])($modified_img);
             } else { 
-                $black = imagecolorallocate($img_d, 0, 0, 0);
-                $white = imagecolorallocate($img_d, 255, 255, 255);
 
-                imagefill($img_d, 0, 0, $white);
-                imagefttext($img_d, 20, 0, ($modified_width -20*(strlen('Not found')))/2 , $modified_height/2 + 10, $black, $font_path, 'Not found');
+                // return Notfound image
+                $font_path = dirname(__FILE__) . "/_font/Roboto-Black.ttf"; // font for NotFound image
+                $black = imagecolorallocate($modified_img, 0, 0, 0);
+                $white = imagecolorallocate($modified_img, 255, 255, 255);
+
+                imagefill($modified_img, 0, 0, $white);
+                imagefttext($modified_img, 20, 0, ($modified_width -20*(strlen('Not found')))/2 , $modified_height/2 + 10, $black, $font_path, 'Not found');
 
                 header('Content-Type: image/jpeg');
-                imagejpeg($img_d);
+                imagejpeg($modified_img);
             }
 
-            imagedestroy($img_d);
+            imagedestroy($modified_img);
+            imagedestroy($original_img);
             return;
         }
 
@@ -231,35 +238,37 @@ class PublicController extends Controller {
     /**
      * Factory to produce image
      * 
+     * @param string $path - a link to directory
+     * @param string filename - filename in an directory
+     * @return array | boolean
      */
     private function imageFactory($path, $filename) {
-        $img = false;
-        $extension = false;
-        $extension = mime_content_type($path . $filename); // Return true extension of a file
+        $original_img = false;
+        $extension    = mime_content_type($path . $filename); // Return true extension of a file
 
         switch($extension) {
             case 'image/png': 
-                $img = imagecreatefrompng($path . $filename);
+
+                $original_img = imagecreatefrompng($path . $filename);
                 [$width, $height, $others] = getimagesize($path . $filename);
+                
                 break;
             case 'image/jpeg':
-                $img = imagecreatefromjpeg($path . $filename);
+
+                $original_img = imagecreatefromjpeg($path . $filename);
                 [$width, $height, $others] = getimagesize($path . $filename);
+                
                 break;
         }
 
         $data = [
             'name'          => $filename,
             'extension'     => $extension, 
-            'image'         => $img,
+            'image'         => $original_img,
             'width'         => $width,
             'height'        => $height    
         ];
 
-        if (!in_array(false, $data)) {
-            return $data;
-        }
-
-        return false;
+        return (!in_array(false, $data) ? $data : false);
     }
 } 
