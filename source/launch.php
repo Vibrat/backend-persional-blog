@@ -14,6 +14,8 @@ session_start([
     'cookie_lifetime' => 86400,
 ]);
 
+header("Access-Control-Allow-Origin: *");
+
 ## start our engine
 $this->set('engine', new Engine());
 $engine = $this->get('engine');
