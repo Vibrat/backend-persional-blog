@@ -98,6 +98,130 @@
     }
 
     /**
+     * Update New Record
+     * 
+     * @param string title - required - unique value 
+     * @param string des - optional 
+     * @param string tags - optional
+     * @param string category - optional
+     * @param string seo_title - required - unique value
+     * @param string seo_des - optional
+     * @param string seo_url - required - unique value
+     */
+    public function updateARecord(Array $data) {
+        $config = [
+            'id'        => [ 'required' => true ],
+            'title'     => [ 'required' => false, 'default' => null ],
+            'des'       => [ 'required' => false, 'default' => null ],
+            'tags'      => [ 'required' => false, 'default' => null ],
+            'category'  => [ 'required' => false, 'default' => null ],
+            'seo_title' => [ 'required' => false, 'default' => null ],
+            'seo_des'   => [ 'required' => false, 'default' => null ],
+            'seo_url'   => [ 'required' => false, 'default' => null]
+        ];
+
+        try {
+            array_walk($config, function($item, $key, $data) {
+                if (isset($data[$key])) {
+                    return;
+                }
+    
+                if (!$item['required']) {
+                    $data[$key] = (!$item['required']) ? $item['default'] : null;
+                } else {
+                    throw new \Exception($key . ' parameter does not exist');
+                }
+            }, $data);
+        } catch (\Exception $e) {
+            return [
+                'success'   => false,
+                'message'   => $e->getMessage()
+            ];
+        }
+
+        ## Count number of record by `id`
+        $sql_count_id = "SELECT COUNT(*) as total FROM `" . DB_PREFIX . "blog` WHERE `id` = :id LIMIT 1";
+        if (!$this->db->query($sql_count_id, [
+            ':id'   => $data['id']
+        ])->row('total')) {
+            return [
+                'success'   => false,
+                'message'   => 'There is no article with id ' . $data['id']
+            ];
+        }
+
+        ## Count numbers of title
+        $sql_count_title     = "SELECT COUNT(*) as total FROM `" . DB_PREFIX ."blog` WHERE `title` = :title AND `id` != :id LIMIT 1"; 
+        if ($this->db->query($sql_count_title, [
+            ':title'    => $data['title'],
+            ':id'       => $data['id']
+        ])->row('total')) {
+            return [
+                'success'   => false,
+                'message'   => 'There is already an article named ' . $data['title']
+            ];
+        }
+
+        ## Count number of seo title
+        $sql_count_seo_title = "SELECT COUNT(*) as total FROM `" . DB_PREFIX . "blog` WHERE `seo_title` = :seo_title AND `id` != :id LIMIT 1";
+        if ($this->db->query($sql_count_seo_title, [
+            ':seo_title'    => $data['seo_title'],
+            ':id'           => $data['id']
+        ])->row('total')) {
+            return [
+                'success'   => false,
+                'message'   => 'There is already an article has seo_title as ' . $data['seo_title']
+            ];
+        }
+
+        ## Count number of seo url
+        $sql_count_seo_url   = "SELECT COUNT(*) as total FROM `" . DB_PREFIX . "blog` WHERE `seo_url` = :seo_url AND `id` != :id LIMIT 1";
+        if ($this->db->query($sql_count_seo_url, [
+            ':seo_url'      => $data['seo_url'],
+            ':id'           => $data['id']
+        ])->row('total')) {
+            return [
+                'success'   => false,
+                'message'   => 'There is already an article with seo_url as ' . $data['seo_url']
+            ];
+        }
+       
+        ## Insert a record into table blog
+        $sql   = "UPDATE `" . DB_PREFIX . "blog` SET ";
+
+        $id = $data['id'];
+        unset ($data['id']);
+
+        foreach($data as $key => $value) {
+            if ($key != 'id' && isset($config[$key])) {
+                if ($value == reset($data)) {
+                    $sql .=   $key . " = :" . $key;
+                } else {
+                    $sql .= ", " . $key . " = :" . $key;
+                }
+            }
+        }
+
+        $sql .= " WHERE `id` = :id";
+
+        $query = $this->db->query($sql, [
+            ':id'           => $id,
+            ':title'        => $data['title'],
+            ':des'          => $data['des'],
+            ':tags'         => $data['tags'],
+            ':category'     => $data['category'],
+            ':seo_title'    => $data['seo_title'],
+            ':seo_des'      => $data['seo_des'],
+            ':seo_url'      => $data['seo_url']
+        ]);
+
+        return [
+            'success'       => true, 
+            'data'          => $query->rowsCount()
+        ];
+    }
+
+    /**
      * Delete a row in table `blog`
      * 
      * @param string $id 

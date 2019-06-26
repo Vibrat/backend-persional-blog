@@ -211,12 +211,14 @@
         $get_data = $this->http->data('GET');
         
         // Allow to only query 100 articles at a time 
-        if (!isset($data['limit']) || $get_data['limit'] > 100 ) {
+        if (!isset($get_data['limit']) || $get_data['limit'] > 100 ) {
             $get_data['limit'] = 100;
         } 
 
         $this->model->load('blog/blog');
         $response = $this->model->blog->listRecords($get_data);
+
+        unset($response['success']);
 
         $this->json->sendBack([
             'success'   => true,
@@ -224,5 +226,59 @@
             'data'      => $response
         ]);
         return;
+    }
+
+    /**
+     * Update new blog record
+     * 
+     * @endpoint POST api=blog/public/update&token=<>
+     * @param string title - required - unique value 
+     * @param string des - optional 
+     * @param string tags - optional
+     * @param string category - optional
+     * @param string seo_title - required - unique value
+     * @param string seo_des - optional
+     * @param string seo_url - required - unique value
+     */
+    public function update() {
+        if ($this->http->method() != 'PUT') {
+
+            $this->json->sendBack([
+                'success'   => false,
+                'code'      => 403,
+                'message'   => 'This API only supports method PUT'
+            ]);
+            return;
+        }
+
+        $get_data = $this->http->data('GET');
+        if($this->user->isTokenValid($get_data['token'])) {
+
+            $this->model->load("blog/blog");
+            $post_data = $this->http->data('PUT');
+            $response = $this->model->blog->updateARecord($post_data);
+
+            if ($response['success']) {
+                $this->json->sendBack([
+                    'success'   => true,
+                    'code'      => 200,
+                    'message'   => 'successfully Update a record'
+                ]);
+                return;
+            }
+
+            $this->json->sendBack([
+                'success'   => false,
+                'code'      => 403,
+                'message'   => $response['message']
+            ]);
+            return;
+        }
+
+        $this->json->sendBack([
+            'success'   => false,
+            'code'      => 401,
+            'message'   => 'Token is invalid'
+        ]);
     }
  }
