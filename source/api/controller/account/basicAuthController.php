@@ -104,7 +104,7 @@ class BasicAuthController extends Controller
 
         $get_data = $this->http->data('GET');
         $this->json->sendBack([
-            'success'   => $this->user->isTokenValid($get_data['token'])
+            'success'   => $this->user->isTokenValid($get_data['token']) ? true : false
         ]);
     }
 
