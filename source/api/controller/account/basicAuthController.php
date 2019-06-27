@@ -88,6 +88,27 @@ class BasicAuthController extends Controller
     }
 
     /**
+     * Check if token is valid
+     * 
+     * @endpoint GET api=account/basic-auth/token&token=<>
+     * @param string token
+     */
+    public function token() {
+        if ($this->http->method() != 'GET') {
+            $this->json->sendBack([
+                'success'   => false,
+                'message'   => 'This API only supports method GET'
+            ]); 
+            return;
+        }
+
+        $get_data = $this->http->data('GET');
+        $this->json->sendBack([
+            'success'   => $this->user->isTokenValid($get_data['token'])
+        ]);
+    }
+
+    /**
      *  Validate User Rule for 'username' and 'password' 
      *
      *  @param Array $data ['username' => 'lamnguyen' , 'password' => 'password']
