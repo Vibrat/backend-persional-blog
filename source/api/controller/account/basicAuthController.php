@@ -9,6 +9,7 @@
  * @method logout
  * @method checkToken
  */
+
 use \System\Model\Controller;
 use phpDocumentor\Reflection\Types\Boolean;
 
@@ -88,17 +89,57 @@ class BasicAuthController extends Controller
     }
 
     /**
+     * List users
+     * 
+     * @endpoint GET api=account/basic-auth/list&offset=<>&limit=<>&group=<>
+     * @param token
+     * @param offset optional
+     * @param limit optional default 100
+     * @param group optional default *
+     */
+    public function list()
+    {
+
+        if ($this->http->method() != 'GET') {
+            $this->json->sendBack([
+                'success'   => false,
+                'code'      => 403,
+                'message'   => 'This API only supports method GET'
+            ]);
+            return;
+        }
+
+        $get_data = $this->http->data('GET');
+        if ($this->user->isTokenValid($get_data['token'])) {
+            $this->model->load('account/account');
+
+            $response = $this->model->account->listAccounts($get_data);
+
+            $this->json->sendBack($response);
+            return;
+        }
+
+        $this->json->sendBack([
+            'success'   => false,
+            'code'      => 401,
+            'message'   => 'token is invalid'
+        ]);
+        return;
+    }
+
+    /**
      * Check if token is valid
      * 
      * @endpoint GET api=account/basic-auth/token&token=<>
      * @param string token
      */
-    public function token() {
+    public function token()
+    {
         if ($this->http->method() != 'GET') {
             $this->json->sendBack([
                 'success'   => false,
                 'message'   => 'This API only supports method GET'
-            ]); 
+            ]);
             return;
         }
 
@@ -116,20 +157,20 @@ class BasicAuthController extends Controller
      */
     private function validateUser($data)
     {
-    
-    ## validate if empty
+
+        ## validate if empty
         if (!isset($data['username']) || !isset($data['password'])) {
             return;
         }
 
-    ## validate if exists
+        ## validate if exists
         if ($this->model->account->checkAccount($data['username'])) {
             return;
         }
 
-    ## validate if password egitibility
+        ## validate if password egitibility
         if (!(function ($pwd) {
-        ## validate password
+            ## validate password
             if (strlen($pwd) < 8) {
                 return;
             }
