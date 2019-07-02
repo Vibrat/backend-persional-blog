@@ -53,7 +53,7 @@ namespace Database;
      */
     public function rows() {
         /** return row of values */
-        return ($this->query ? $this->query->fetchAll(\PDO::FETCH_GROUP|\PDO::FETCH_ASSOC) : false);
+        return ($this->query ? $this->query->fetchAll(\PDO::FETCH_ASSOC) : false);
     }
 
     /**
