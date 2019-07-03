@@ -14,6 +14,7 @@ session_start([
     'cookie_lifetime' => 86400,
 ]);
 
+header("Access-Control-Allow-Methods: POST, GET, DELETE, PUT");
 header("Access-Control-Allow-Origin: *");
 
 ## start our engine
