@@ -130,6 +130,43 @@ class BasicAuthController extends Controller
     }
 
     /**
+     * Check if an account exist
+     * 
+     * @endpoint GET api=account/basic-auth/is-account-exist&usernam=<>&token=<>
+     * @param string username
+     * @param string token
+     */
+    public function isAccountExist() {
+        if ($this->http->method() != 'GET') {
+
+            $this->json->sendBack([
+                'success'   => false,
+                'code'      => 403,
+                'message'   => 'This API only supports method `GET`'
+            ]);
+            return;
+        }
+
+        $get_data = $this->http->data('GET');
+        if ($this->user->isTokenValid($get_data['token'])) {
+            $this->model->load('account/account');
+
+            $response = $this->model->account->checkAccount($get_data['username']);
+
+            $this->json->sendBack([
+                'success'   => $response ? true : false
+            ]);
+            return;
+        }
+
+        $this->json->sendBack([
+            'success'   => false,
+            'code'      => 401,
+            'message'   => 'Token is invalid'
+        ]);
+    }
+
+    /**
      * List users
      * 
      * @endpoint GET api=account/basic-auth/list&offset=<>&limit=<>&group=<>

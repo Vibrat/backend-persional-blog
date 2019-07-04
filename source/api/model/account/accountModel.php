@@ -17,7 +17,7 @@ class AccountModel extends BaseModel
     public function checkAccount($username)
     {
 
-        $sql = "SELECT COUNT(*) as total FROM `" . DB_PREFIX . "users` WHERE username = :username ";
+        $sql = "SELECT COUNT(*) as total FROM `" . DB_PREFIX . "users` WHERE username = :username LIMIT 1";
         $query = $this->db->query($sql, [
             ':username' => $username
         ]);
