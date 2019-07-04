@@ -65,6 +65,47 @@ class BasicAuthController extends Controller
     }
 
     /**
+     * Delete an account
+     * 
+     * @endpoint DELETE api=account/basic-auth/delete&username=<>&token=<>
+     * @param string username
+     * @param string token
+     */
+    public function delete() {
+        if ($this->http->method() != 'DELETE') {
+            $this->json->sendBack([
+                'success'    => true,
+                'code'       => 403,
+                'message'    => 'This API only support method DELETE'
+            ]);
+            return;
+        }
+
+        $get_data = $this->http->data('GET');
+        if ($this->user->isTokenValid($get_data['token'])) {
+            $this->model->load('account/account');
+
+            $response = $this->model->account->deleteAccount($get_data['username']);
+
+            $this->json->sendBack([
+                'success'         => $response['success'],
+                'code'            => $response['success'] ? 200 : 403,
+                'affected_rows'   => $response['affected_rows'],
+                'message'         => $response['affected_rows'] ? 
+                                     "Successfly delete account" : "No Account exists in server"
+            ]);
+            return;
+        }
+
+        $this->json->sendBack([
+            'success'   => false,
+            'code'      => 401,
+            'message'   => 'Token is invalid'
+        ]);
+        return;
+    }
+
+    /**
      * Login and Return token
      *
      * @param SESSION $_POST['username']

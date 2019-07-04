@@ -98,4 +98,27 @@ class AccountModel extends BaseModel
             'limit'   => $data['limit']    
         ];
     }
+
+
+    public function deleteAccount(String $username) {
+
+        if ($username == 'root') {
+            return [
+                'success'   => false,
+                'message'   => 'Cannot delete user `root`'
+            ];
+        }
+
+        $sql = "DELETE FROM `" . DB_PREFIX . "users` WHERE `username` = :username LIMIT 1";
+        $query = $this->db->query($sql, [
+            ':username'     => $username
+        ]);
+
+        $rows_affected = $query->rowsCount();
+
+        return [
+            'success'   =>  $rows_affected ? true : false,
+            'affected_rows' => $rows_affected
+        ];
+    }
 }
