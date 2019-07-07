@@ -26,8 +26,17 @@ class BasicAuthController extends Controller
      */
     public function new()
     {
+        if ($this->http->method() != 'POST') {
+            $this->json->sendBack([
+                'success'   => false,
+                'code'      => 403,
+                'message'   => 'This API only supports method `POST`'
+            ]);
+            return;
+        }
 
-        if (!$this->user->isTokenValid($_POST['token'])) {
+        $get_data = $this->http->data('GET');
+        if (!$this->user->isTokenValid($get_data['token'])) {
             $this->json->sendBack([
                 'success' => false,
                 'message' => [
