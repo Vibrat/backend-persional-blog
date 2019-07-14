@@ -41,6 +41,34 @@ class AccountModel extends BaseModel
     }
 
     /**
+     * Get an account information based on username
+     * 
+     * @param String $username
+     */
+    public function getAccount(String $username) {
+        if (isset($username) && is_String($username)) {
+            $sql_account  = "SELECT u.`id`, u.`username`, g.`name` AS `groupname` FROM `" . DB_PREFIX . "users` u";
+            $sql_account .= " LEFT JOIN `" . DB_PREFIX . "users_permission` p ON (u.id = p.user_id)" .  
+                            " LEFT JOIN `" . DB_PREFIX . "users_group` g  ON (p.group_permission_id = g.id)";
+            $sql_account .= " WHERE u.username = :username";
+
+            $query = $this->db->query($sql_account, [
+                ':username' => $username
+            ]);
+
+            return [
+                'success' => true,
+                'data'    => $query->row()
+            ];
+        }
+
+        return [
+            'success'   => false,
+            'data'      => []
+        ];
+    }
+
+    /**
      * List users
      * 
      * @param offset optional default 0

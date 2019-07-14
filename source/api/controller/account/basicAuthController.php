@@ -53,8 +53,9 @@ class BasicAuthController extends Controller
 
             $success = $this->model->account->createAccount($_POST);
             if ($success) {
-
-                $this->login();
+                $account_info = $this->model->account->getAccount($_POST['username']);
+                
+                $this->json->sendBack($account_info);
                 return;
             }
 
