@@ -48,8 +48,8 @@ class BasicAuthController extends Controller
         };
 
         $this->model->load('account/account');
-
-        if ($this->validateUser($_POST)) {
+        $validator = $this->validateUser($_POST);
+        if ($validator['success']) {
 
             $success = $this->model->account->createAccount($_POST);
             if ($success) {
@@ -66,12 +66,7 @@ class BasicAuthController extends Controller
             return;
         }
 
-        $this->json->sendBack([
-            'success' => false,
-            'message' => [
-                'User already exists'
-            ]
-        ]);
+        $this->json->sendBack($validator);
     }
 
     /**
@@ -248,12 +243,18 @@ class BasicAuthController extends Controller
 
         ## validate if empty
         if (!isset($data['username']) || !isset($data['password'])) {
-            return;
+            return [
+                'success'   => false,
+                'message'   => '`Username` or `password is not set`'
+            ];
         }
 
         ## validate if exists
         if ($this->model->account->checkAccount($data['username'])) {
-            return;
+            return [
+                'success'   => false,
+                'message'   => 'Username already exists on server'
+            ];
         }
 
         ## validate if password egitibility
@@ -265,9 +266,14 @@ class BasicAuthController extends Controller
 
             return true;
         })($data['password'])) {
-            return;
+            return [
+                'success'   => false,
+                'message'   => 'Password is not set'
+            ];
         }
 
-        return true;
+        return [
+            'success'   => true,
+        ];
     }
 }
