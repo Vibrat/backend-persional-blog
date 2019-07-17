@@ -20,7 +20,8 @@ class GroupModel extends BaseModel
      * @return number or string
      * @access public
      */
-    public function getSummary() {
+    public function getSummary()
+    {
         $sql = "SELECT COUNT(id) AS total FROM `" . DB_PREFIX . "users_group`";
         return $this->db->query($sql)->row('total');
     }
@@ -45,17 +46,22 @@ class GroupModel extends BaseModel
      * @param array properties: 'offset', 'limit'
      * @access public
      */
-    public function listGroups($data) {
-        
-        if (
-            is_numeric($data['offset']) && 
-            is_numeric($data['limit'])
-            ) {
+    public function listGroups($data)
+    {
 
-            $sql = "SELECT * FROM `" . DB_PREFIX . "users_group` LIMIT " . (int) $data['offset'] . ", " . (int) $data['limit'] . "";
-            return $this->db->query($sql)->rows();
+        if (
+            is_numeric($data['offset']) &&
+            is_numeric($data['limit'])
+        ) {
+
+            $sql =  "SELECT * FROM `" . DB_PREFIX . "users_group`";
+            $sql .= isset($data['groupname']) ? " WHERE  `name` LIKE :groupname" : "";
+            $sql .= " LIMIT " . (int) $data['offset'] . ", " . (int) $data['limit'] . "";
+            return $this->db->query($sql, isset($data['groupname']) ? [
+                ':groupname' => "%" . $data['groupname'] . "%"
+            ] : [])->rows();
         }
-       
+
         throw new \Exception("offset and limit values are in correct");
     }
 
@@ -121,15 +127,16 @@ class GroupModel extends BaseModel
      * 
      * @param Array $data contains 'permission', 'name'
      */
-    public function updateGroupPermissions(Array $data) {
+    public function updateGroupPermissions(array $data)
+    {
 
         $sql = "UPDATE `" . DB_PREFIX . "users_group` SET permission = :permission WHERE name = :name";
-        
+
         $query = $this->db->query($sql, [
             ':permission' => $data['permission'],
-            ':name'       => $data['name']  
+            ':name'       => $data['name']
         ]);
-        
+
         $affected_rows = $query->rowsCount();
 
         return $affected_rows;
@@ -143,7 +150,8 @@ class GroupModel extends BaseModel
      * @param string $name name of group to delete
      * @return number number of rows affected
      */
-    public function deleteGroupByName($name = '') {
+    public function deleteGroupByName($name = '')
+    {
         $sql = "DELETE FROM `" . DB_PREFIX . "users_group` WHERE name = :name LIMIT 1";
         return $this->db->query($sql, [
             ':name' => $name
@@ -156,22 +164,23 @@ class GroupModel extends BaseModel
      * @access public
      * @param string[] contains properties 'name' (group name) && 'permission'
      */
-    public function addPermission(Array $data) {
+    public function addPermission(array $data)
+    {
         $sql_permission = "SELECT `permission` FROM `" . DB_PREFIX . "users_group` WHERE name = :name";
         $permission = $this->db->query($sql_permission, [
             ':name' => $data['name']
         ])->row('permission');
-        
+
         $permission = empty($permission) ? '{ "api": []}' : $permission;
         $permission = json_decode($permission);
-        array_push($permission->api, $data['permission']);    
+        array_push($permission->api, $data['permission']);
 
         $sql_update_permission = "UPDATE `" . DB_PREFIX . "users_group` SET permission = :permission WHERE name = :name";
         $query = $this->db->query($sql_update_permission, [
             ':permission'   => json_encode($permission),
             ':name'         => $data['name']
         ]);
-        
+
         return $query->rowsCount();
     }
 }
