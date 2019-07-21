@@ -104,14 +104,16 @@ class AccountModel extends BaseModel
         $sql .= " LEFT JOIN `" . DB_PREFIX . "users_permission` p ON (u.id = p.user_id)" .  
                         " LEFT JOIN `" . DB_PREFIX . "users_group` g  ON (p.group_permission_id = g.id)";
         $sql .= ($data['group'] ? " WHERE g.`name` = :group" : "");
+        $sql .= " GROUP BY u.`id`, u.`username`";
 
         $query = $this->db->query($sql, $bind_params);
         $total = $query->row('total');
 
-        $sql_account = "SELECT u.`id`, u.`username`, g.`name` AS `groupname` FROM `" . DB_PREFIX . "users` u";
+        $sql_account = "SELECT u.`id`, u.`username`, GROUP_CONCAT(g.`name` SEPARATOR ', ') AS `groupname` FROM `" . DB_PREFIX . "users` u";
         $sql_account .= " LEFT JOIN `" . DB_PREFIX . "users_permission` p ON (u.id = p.user_id)" .  
                         " LEFT JOIN `" . DB_PREFIX . "users_group` g  ON (p.group_permission_id = g.id)";
         $sql_account .= ($data['group'] ? " WHERE g.`name` = :group" : "");
+        $sql_account .= " GROUP BY u.`id`, u.`username`";
         $sql_account .= " LIMIT " . $data['offset'] . ", " . $data['limit'] . "";
 
         $query = $this->db->query($sql_account, $bind_params);

@@ -263,7 +263,7 @@ class GroupPermissionController extends Controller
    * 
    * @endpoint POST account/group-permissions/add-user-to-group&token=<>
    * @param token
-   * @param userId
+   * @param userId `root, VIP2`
    * @param groupId
    * @access public
    */
@@ -286,7 +286,6 @@ class GroupPermissionController extends Controller
     if ($this->user->isTokenValid($get_data['token'])) {
 
       $this->model->load('account/group');
-
       if ($this->model->group->addUserToGroup($post_data)) {
         $this->json->sendBack([
           'success' => true,
