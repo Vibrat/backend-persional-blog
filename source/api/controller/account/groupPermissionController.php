@@ -289,7 +289,11 @@ class GroupPermissionController extends Controller
       if ($this->model->group->addUserToGroup($post_data)) {
         $this->json->sendBack([
           'success' => true,
-          'message' => 'Group has been added a permission'
+          'message' => 'Group has been added a permission',
+          'data' => [
+            'userId'  => $post_data['userId'],
+            'groupId' => $post_data['groupId']
+          ]
         ]);
 
         return;
