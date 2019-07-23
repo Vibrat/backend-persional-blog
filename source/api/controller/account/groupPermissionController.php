@@ -309,6 +309,54 @@ class GroupPermissionController extends Controller
     $this->tokenInvalid();
   }
 
+
+  /**
+   * Add a user to group by groupname
+   * 
+   * @endpoint POST api=account/group/add-user-to-group-by-name&token=<>
+   * @param userId
+   * @param groupname
+   */
+  public function addUserToGroupByName() {
+    if ($this->http->method() != 'POST') {
+      
+      $this->json->sendBack([
+        'success' => false,
+        'message' => 'Unsupported method for this api'
+      ]);
+
+      return;
+    }
+
+    $get_data  = $this->http->data('GET');
+    $post_data = $this->http->data('POST');
+
+    if ($this->user->isTokenValid($get_data['token'])) {
+
+      $this->model->load('account/group');
+      if ($this->model->group->addUserToGroupByGroupName($post_data)) {
+        $this->json->sendBack([
+          'success' => true,
+          'message' => 'Group has been added a permission',
+          'data' => [
+            'userId'    => $post_data['userId'],
+            'groupname' => $post_data['groupname']
+          ]
+        ]);
+
+        return;
+      }
+
+      $this->json->sendBack([
+        'success' => false,
+        'message' => 'Error: Please check if group exists or UserId Exists'
+      ]);
+      return;
+    }
+
+    $this->tokenInvalid();
+  }
+
   /**
    * delete a group contact
    * 

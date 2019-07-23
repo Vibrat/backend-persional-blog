@@ -103,15 +103,46 @@ class GroupModel extends BaseModel
     public function addUserToGroup($payload)
     {
 
-        $sql_num_groups = "SELECT COUNT(*) as total  FROM `" . DB_PREFIX . "users_group` WHERE id = '" . $payload['groupId'] . "'";
+        $sql_group_id = "SELECT COUNT(*) as total  FROM `" . DB_PREFIX . "users_group` WHERE id = '" . $payload['groupId'] . "'";
         $sql_num_permissions = "SELECT COUNT(*) as total FROM `" . DB_PREFIX . "users_permission` WHERE user_id = '" . $payload['userId'] . "' AND group_permission_id = '" . $payload['groupId'] . "'";
         $sql_insert_permissions = "INSERT INTO `" . DB_PREFIX . "users_permission` SET user_id = '" . $payload['userId'] . "', group_permission_id = '" . $payload['groupId'] . "'";
 
-        if ($this->db->query($sql_num_groups)->row('total')) {
+        if ($this->db->query($sql_group_id)->row('total')) {
 
             if (!$this->db->query($sql_num_permissions)->row('total')) {
 
                 $query_add = $this->db->query($sql_insert_permissions);
+
+                if ($query_add->rowsCount()) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+
+    /**
+     * Add a user to group (insert into table users_permission)
+     * 
+     * @param string[] userId, name as groupname
+     */
+    public function addUserToGroupByGroupName($payload) {
+        $sql_group_id = "SELECT `id` FROM `" . DB_PREFIX . "users_group` WHERE name = '" . $payload['groupname'] . "'";
+        $sql_num_permissions = "SELECT COUNT(*) as total FROM `" . DB_PREFIX . "users_permission` WHERE user_id = '" . $payload['userId'] . "' AND group_permission_id = :groupId";
+        $sql_insert_permissions = "INSERT INTO `" . DB_PREFIX . "users_permission` SET user_id = '" . $payload['userId'] . "', group_permission_id = :groupId";
+
+        $group_id = $this->db->query($sql_group_id)->row('id');
+        if ($group_id || $group_id == 0) {
+            $query = $this->db->query($sql_num_permissions, [
+                ':groupId' => $group_id
+            ]);
+            $total_permissions = $query->row('total');
+            if (!$total_permissions) {
+
+                $query_add = $this->db->query($sql_insert_permissions, [
+                    ':groupId'  => $group_id
+                ]);
 
                 if ($query_add->rowsCount()) {
                     return true;
