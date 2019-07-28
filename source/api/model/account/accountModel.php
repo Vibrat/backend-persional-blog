@@ -100,6 +100,7 @@ class AccountModel extends BaseModel
             $bind_params[':group'] = $data['group'];
         }
 
+        # Query Statistics
         $sql  = "SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "users` u";
         $sql .= " LEFT JOIN `" . DB_PREFIX . "users_permission` p ON (u.id = p.user_id)" .  
                         " LEFT JOIN `" . DB_PREFIX . "users_group` g  ON (p.group_permission_id = g.id)";
@@ -109,7 +110,8 @@ class AccountModel extends BaseModel
         $query = $this->db->query($sql, $bind_params);
         $total = $query->row('total');
 
-        $sql_account = "SELECT u.`id`, u.`username`, JSON_OBJECTAGG(IFNULL(g.id, '_'), IFNULL(g.name, '_')) AS `groupname` FROM `" . DB_PREFIX . "users` u";
+        # Query Data
+        $sql_account = "SELECT u.`id`, u.`username`, JSON_OBJECTAGG(IFNULL(g.id, '_'), IFNULL(g.name, '_')) AS `group` FROM `" . DB_PREFIX . "users` u";
         $sql_account .= " LEFT JOIN `" . DB_PREFIX . "users_permission` p ON (u.id = p.user_id)" .  
                         " LEFT JOIN `" . DB_PREFIX . "users_group` g  ON (p.group_permission_id = g.id)";
         $sql_account .= ($data['group'] ? " WHERE g.`name` = :group" : "");
@@ -119,11 +121,11 @@ class AccountModel extends BaseModel
         $query = $this->db->query($sql_account, $bind_params);
         $accounts = $query->rows();
 
-        // Reformat Data
+        # Reformat Data
         $accounts = array_map(function($item) {
-            $item['groupname'] = json_decode($item['groupname']);
+            $item['group'] = json_decode($item['group']);
             
-            // Unset default value getting from mysql JSON_OBJECTAGG
+            # Unset default value getting from mysql JSON_OBJECTAGG
             unset($item['groupname']->_);
             return $item;
         }, $accounts);
