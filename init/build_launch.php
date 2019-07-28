@@ -38,6 +38,7 @@ while (true) {
         break;
     } catch (\Exception $e) {
 
+        echo $e->getMessage();
         if ($num_trials == DB_NUM_TRIALS) {
             echo $e->getMessage();
             exit('Exit: Fail when connects to database' . PHP_EOL);

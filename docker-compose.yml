@@ -12,6 +12,7 @@ services:
       && apachectl -D FOREGROUND"   
     volumes: 
       - ./source:/var/www/html
+      - ./init:/var/init
     ports: 
       - 81:80
     depends_on:
@@ -21,7 +22,8 @@ services:
    
   db_blog:
     container_name: db_blog
-    image: mysql:5.7
+    command: --default-authentication-plugin=mysql_native_password
+    image: mysql:8.0
     restart: always
     networks: 
       - rest-api
