@@ -126,7 +126,7 @@ class AccountModel extends BaseModel
             $item['group'] = json_decode($item['group']);
             
             # Unset default value getting from mysql JSON_OBJECTAGG
-            unset($item['groupname']->_);
+            unset($item['group']->_);
             return $item;
         }, $accounts);
 
