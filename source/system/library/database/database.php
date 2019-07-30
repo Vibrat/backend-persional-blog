@@ -63,14 +63,14 @@ class MySqliDatabase {
         
         ## Execute non-param statement
         if (empty($data) && $conn && $query = $conn->query($sql)) {
-            $this->response->initDataConnection($query);
+            $this->response->initDataConnection($query, $conn);
         }
 
         ## binding to value to prevent XSS
         if ($conn && !empty($data)) {
             $cursor = $conn->prepare($sql);
             if ($cursor->execute($data)) {
-                $this->response->initDataConnection($cursor);
+                $this->response->initDataConnection($cursor, $conn);
             }
         }
         

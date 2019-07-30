@@ -274,6 +274,7 @@ class GroupPermissionController extends Controller
       
       $this->json->sendBack([
         'success' => false,
+        'code'    => 401,
         'message' => 'Unsupported method for this api'
       ]);
 
@@ -289,6 +290,7 @@ class GroupPermissionController extends Controller
       if ($this->model->group->addUserToGroup($post_data)) {
         $this->json->sendBack([
           'success' => true,
+          'code'    => 200,
           'message' => 'Group has been added a permission',
           'data' => [
             'userId'  => $post_data['userId'],
@@ -301,6 +303,7 @@ class GroupPermissionController extends Controller
 
       $this->json->sendBack([
         'success' => false,
+        'code'    => 403,
         'message' => 'Error: Please check if group exists or UserId Exists'
       ]);
       return;
@@ -322,6 +325,7 @@ class GroupPermissionController extends Controller
       
       $this->json->sendBack([
         'success' => false,
+        'code'    => 401,
         'message' => 'Unsupported method for this api'
       ]);
 
@@ -334,12 +338,14 @@ class GroupPermissionController extends Controller
     if ($this->user->isTokenValid($get_data['token'])) {
 
       $this->model->load('account/group');
-      if ($this->model->group->addUserToGroupByGroupName($post_data)) {
+      if ($lastInsertId = $this->model->group->addUserToGroupByGroupName($post_data)) {
         $this->json->sendBack([
           'success' => true,
+          'code'    => 200,
           'message' => 'Group has been added a permission',
           'data' => [
             'userId'    => $post_data['userId'],
+            'groupId'   => $lastInsertId,
             'groupname' => $post_data['groupname']
           ]
         ]);
@@ -349,7 +355,8 @@ class GroupPermissionController extends Controller
 
       $this->json->sendBack([
         'success' => false,
-        'message' => 'Error: Please check if group exists or UserId Exists'
+        'code'    => '403',
+        'message' => 'Username or Group already assigned, or not exist'
       ]);
       return;
     }
