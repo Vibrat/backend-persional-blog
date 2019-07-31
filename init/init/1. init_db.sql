@@ -46,7 +46,7 @@ CREATE TABLE `users_group` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 INSERT INTO `users_group` (`id`, `name`, `permission`) VALUES
-(1,	'',	''),
+(1,	'root',	''),
 (2,	'VIP2',	'{\"api\": [\"post/account/basic-auth/new-group\"]}');
 
 DROP TABLE IF EXISTS `users_permission`;

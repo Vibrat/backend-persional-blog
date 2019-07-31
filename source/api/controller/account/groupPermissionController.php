@@ -4,13 +4,15 @@
  * Group Permissions
  * 
  * @method newGroupPermissions api=post/account/group-permission/new-group
+ * @var \Http\DataSubmit $this->http
+ * @var \Authenticator\Authenticator $this->user
  */
 
 use System\Model\Controller;
 
 class GroupPermissionController extends Controller
 {
-  
+
   /**
    * List group of permissions
    * 
@@ -18,10 +20,10 @@ class GroupPermissionController extends Controller
    * @access public
    */
   public function listGroups()
-  { 
+  {
     $data = $this->http->data('GET');
 
-    if($this->http->method() != 'GET') {
+    if ($this->http->method() != 'GET') {
       $this->json->sendBack([
         'success' => false,
         'message' => 'API only supports method GET'
@@ -30,12 +32,12 @@ class GroupPermissionController extends Controller
     }
 
     if ($this->user->isTokenValid($data['token'])) {
-  
+
       $this->model->load('account/group');
       try {
         $db_res = $this->model->group->listGroups($data);
         $db_num_records = $this->model->group->getSummary();
-        
+
         $this->json->sendBack([
           'success'     => true,
           'data'        => $db_res,
@@ -45,8 +47,7 @@ class GroupPermissionController extends Controller
             'limit'     => $data['limit']
           ]
         ]);
-
-      } catch(\Exception $e) {
+      } catch (\Exception $e) {
         $this->json->sendBack([
           'success' => false,
           'message' => $e->getMessage()
@@ -78,13 +79,13 @@ class GroupPermissionController extends Controller
         'success' => false,
         'message' => 'API only support method GET'
       ]);
-      
+
       return;
     }
 
     $get_data = $this->http->data('GET');
     if ($this->user->isTokenValid($get_data['token'])) {
-      
+
       $this->model->load('account/group');
       $permissions = $this->model->group->listPermissions($get_data['id']);
 
@@ -109,7 +110,8 @@ class GroupPermissionController extends Controller
    * @param string $permission permission json string
    * @access public
    */
-  public function addPermission() {
+  public function addPermission()
+  {
 
     if ($this->http->method() != 'POST') {
       $this->json->sendBack([
@@ -124,7 +126,7 @@ class GroupPermissionController extends Controller
 
     if ($this->user->isTokenValid($get_data['token'])) {
       $this->model->load('account/group');
-      
+
       $response = $this->model->group->addPermission($post_data);
 
       if ($response) {
@@ -205,7 +207,7 @@ class GroupPermissionController extends Controller
    */
   public function updateGroupPermission()
   {
-    
+
     if ($this->http->method() != 'PUT') {
       $this->json->sendBack([
         'success' => false,
@@ -217,7 +219,7 @@ class GroupPermissionController extends Controller
 
     $put_data = $this->http->data('PUT');
     $get_data = $this->http->data('GET');
-    
+
     ## Validate data
     if (!isset($put_data['permission']) || !is_string($put_data['permission'])) {
       $this->json->sendBack([
@@ -228,7 +230,7 @@ class GroupPermissionController extends Controller
       return;
     }
 
-    if (!isset($put_data['name']) || !is_string($put_data['name'])) {  
+    if (!isset($put_data['name']) || !is_string($put_data['name'])) {
       $this->json->sendBack([
         'success' => false,
         'message' => 'parameter name should exist and have a string value'
@@ -271,7 +273,7 @@ class GroupPermissionController extends Controller
   {
 
     if ($this->http->method() != 'POST') {
-      
+
       $this->json->sendBack([
         'success' => false,
         'code'    => 401,
@@ -320,9 +322,10 @@ class GroupPermissionController extends Controller
    * @param userId
    * @param groupname
    */
-  public function addUserToGroupByName() {
+  public function addUserToGroupByName()
+  {
     if ($this->http->method() != 'POST') {
-      
+
       $this->json->sendBack([
         'success' => false,
         'code'    => 401,
@@ -365,6 +368,66 @@ class GroupPermissionController extends Controller
   }
 
   /**
+   * Remove a user from group by name
+   * 
+   * @endpoint DELETE api=account/group-permission/remove-user-from-group-by-name&token=<>&userId=<>&groupname=<>
+   * @return [
+   *      'success'   => boolean,
+   *      'code'      => number,
+   *      'message'?  => string,
+   *      'data'?     => []
+   * ]
+   */
+  public function removeUserFromGroupByName()
+  {
+    // check method, success passs, else return
+    if ($this->http->method() != 'DELETE') {
+      $this->json->sendBack([
+        'success'   => false,
+        'code'      => 405,
+        'message'   => 'API only supports method `DELETE`'
+      ]);
+      return;
+    }
+
+    // check Token, success pass, else return
+    $get_data = $this->http->data('GET');
+    if ($this->user->isTokenValid($get_data['token'])) {
+
+      $params['userId'] = $get_data['userId'] ? $get_data['userId'] : null;
+      $params['groupname'] = $get_data['groupname'] ? $get_data['groupname'] : null;
+
+      if (in_array(null, $params)) {
+        $this->json->sendBack([
+          'success' => false,
+          'code'    => 400,
+          'message' => '`userId`  or `groupname` is not provided yet'
+        ]);
+        return;
+      }
+
+      /* @var GroupModel */
+      $this->model->load('account/group');
+
+      $response = $this->model->group->removeUserFromGroupByName($params);
+
+      $this->json->sendBack([
+        'success'   => $response['success'],
+        'code'      => $response['success'] ? 200 : 304,
+        'message'   => $response['success'] ? 'sucessful remove a user to group' : 'No effect'
+      ]);
+      return;
+    }
+
+    // Token is invalid
+    $this->json->sendBack([
+      'success'   => false,
+      'code'      => 401,
+      'message'   => 'Token is invalid'
+    ]);
+  }
+
+  /**
    * delete a group contact
    * 
    * @endpoint DELETE 
@@ -385,10 +448,10 @@ class GroupPermissionController extends Controller
     }
 
     if ($this->user->isTokenValid($get_data['token'])) {
-      
+
       $this->model->load('account/group');
       $response = $this->model->group->deleteGroupByName($get_data['name']);
-      
+
       if (!$response) {
         $this->json->sendBack([
           'success' => false,
