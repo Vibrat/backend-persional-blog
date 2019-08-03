@@ -36,7 +36,7 @@ class GroupPermissionController extends Controller
       $this->model->load('account/group');
       try {
         $db_res = $this->model->group->listGroups($data);
-        $db_num_records = $this->model->group->getSummary();
+        $db_num_records = $this->model->group->getSummary($data['groupname']);
 
         $this->json->sendBack([
           'success'     => true,

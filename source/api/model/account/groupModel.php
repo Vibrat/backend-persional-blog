@@ -20,10 +20,18 @@ class GroupModel extends BaseModel
      * @return number or string
      * @access public
      */
-    public function getSummary()
+    public function getSummary($groupname)
     {
+
+        if (isset($groupname) && !is_string($groupname)) {
+            throw new \Exception("`groupname` is not type string");
+        }
+
         $sql = "SELECT COUNT(id) AS total FROM `" . DB_PREFIX . "users_group`";
-        return $this->db->query($sql)->row('total');
+        $sql .=  isset($groupname) ? " WHERE  `name` LIKE :groupname" : "";
+        return $this->db->query($sql, [
+            ':groupname'    => "%" . $groupname . "%"
+        ])->row('total');
     }
 
     /**
