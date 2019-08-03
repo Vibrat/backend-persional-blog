@@ -135,7 +135,7 @@ class GroupModel extends BaseModel
         $sql_insert_permissions = "INSERT INTO `" . DB_PREFIX . "users_permission` SET user_id = '" . $payload['userId'] . "', group_permission_id = :groupId";
 
         $group_id = $this->db->query($sql_group_id)->row('id');
-        if ($group_id || $group_id == 0) {
+        if (isset($group_id) || $group_id === 0) {
             $query = $this->db->query($sql_num_permissions, [
                 ':groupId' => $group_id
             ]);
