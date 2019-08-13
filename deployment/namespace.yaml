@@ -1,0 +1,5 @@
+## Create a root namespace `rest-api`
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rest-api

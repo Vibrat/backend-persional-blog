@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rest-api-deployment
+  namespace: rest-api
+spec: 
+  replicas: 2
+  selector:
+    matchLabels:
+      api: rest-api
+  template:
+    metadata:
+      labels:
+        api: rest-api
+    spec:
+      containers:
+      - name: rest-api
+        image: vibrat/rest-api:latest
+        imagePullPolicy: Always
+        command: ["/bin/sh"]
+        args: ["-c", "php /var/init/index.php && apachectl -D FOREGROUND"]
+        ports:
+        - containerPort: 80
+          protocol: TCP
+      imagePullSecrets:
+      - name: regcred2
