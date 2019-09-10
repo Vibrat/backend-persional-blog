@@ -172,6 +172,39 @@ class BasicAuthController extends Controller
     }
 
     /**
+     * Change Password of a username
+     * 
+     * @endpoint PUT api=account/basic-auth/change-password&token=<>
+     * @param GET token
+     * @param PUT username
+     * @param PUT old-password
+     * @param PUT new-password
+     */
+    public function changePassword() {
+        
+        if ($this->http->method() != 'PUT') {
+            $this->json->sendBack([
+                'success'   => false,
+                'code'      => 403,
+                'message'   => 'This API only supports method PUT'
+            ]);
+            return;
+        }
+
+        $get_data = $this->http->data('GET');
+        if ($this->user->isTokenValid($get_data['token'])) {
+            ## Do sth here
+            return;
+        }
+
+        $this->json->sendBack([
+            'success'   => false,
+            'code'      => 401,
+            'message'   => 'Token is invalid'
+        ]);
+    }
+
+    /**
      * List users
      * 
      * @endpoint GET api=account/basic-auth/list&offset=<>&limit=<>&group=<>
