@@ -172,7 +172,7 @@ class BasicAuthController extends Controller
     }
 
     /**
-     * Change Password of a username
+     * Change password based on known username and password
      * 
      * @endpoint PUT api=account/basic-auth/change-password&token=<>
      * @param GET token
@@ -205,6 +205,42 @@ class BasicAuthController extends Controller
             'success'   => false,
             'code'      => 401,
             'message'   => 'Token is invalid'
+        ]);
+    }
+
+    /**
+     * Change password for an account by admin
+     * 
+     * @endpoint PUT api=account/basic-auth/changePasswordByAdmin
+     * @param GET token
+     * @param PUT username
+     * @param PUT new-password
+     */
+    public function changePasswordByAdmin() {
+        if ($this->http->method() != 'PUT') {
+            $this->json->sendBack([
+                'success'   => false,
+                'code'      => 403,
+                'message'   => 'This api only supports method `PUT`'
+            ]);
+            return;
+        }
+
+        $get_data = $this->http->data('GET');
+        if ($this->user->isTokenValid($get_data['token'])) {
+            
+            $this->model->load('account/account');
+            $put_data = $this->http->data('PUT');
+            $response  = $this->model->account->changePasswordByAdmin($put_data);
+
+            $this->json->sendBack($response);
+            return;
+        }
+
+        $this->json->sendBack([
+            'success'   => false,
+            'code'      => 401,
+            'message'   => 'Unauthenticated'
         ]);
     }
 

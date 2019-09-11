@@ -134,6 +134,60 @@ class AccountModel extends BaseModel
         ];
     } 
 
+    /**
+     * Change password from Admin Role
+     * 
+     * @param username
+     * @param new-password
+     */
+    public function changePasswordByAdmin(Array $data) {
+        
+        # Check if data exists
+        $params = ['username', 'new-password'];
+        foreach($params as $param) {
+            if (empty($data[$param])) {
+                return [
+                    'success'   => false,
+                    'code'      => 'DB_ACCOUNT_MODEL_PARAM',
+                    'message'   => "Param $param does not exist"
+                ];
+            }
+        }
+
+        # Check if username exists
+        $sql_username = "SELECT COUNT(*) as total FROM `" . DB_PREFIX . "users` WHERE username = :username LIMIT 1";
+        $is_username_exist = $this->db->query($sql_username, [
+            ':username'     => $data['username']
+        ])->row('total');
+
+        if ($is_username_exist) {
+            
+            $sql_update_password = "UPDATE `" . DB_PREFIX . "users` SET password = :password WHERE username = :username LIMIT 1";
+            $affected_rows = $this->db->query($sql_update_password, [
+                ':password' => password_hash($data['new-password'], PASSWORD_BCRYPT),
+                ':username' => $data['username']
+            ])->rowsCount();
+            
+            if ($affected_rows) {
+                return [
+                    'success'   => true,
+                    'message'   => 'Updated password for user ' . $data['username']
+                ];
+            }    
+
+            return [
+                'success'   => false,
+                'code'      => 'DB_ACCOUNT_MODEL_QUERY',
+                'message'   => 'No account matched to be executed'
+            ];
+        }
+
+        return [
+            'success'   => false,
+            'code'      => 'DB_ACCOUNT_MODEL_QUERY',
+            'message'   => 'Account does not exist'
+        ];
+    }
 
     /**
      * List users
