@@ -193,7 +193,11 @@ class BasicAuthController extends Controller
 
         $get_data = $this->http->data('GET');
         if ($this->user->isTokenValid($get_data['token'])) {
-            ## Do sth here
+            $this->model->load('account/account');
+            $put_data = $this->http->data('PUT');
+            $response  = $this->model->account->changePassword($put_data);
+            
+            $this->json->sendBack($response);
             return;
         }
 

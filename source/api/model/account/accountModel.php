@@ -69,6 +69,66 @@ class AccountModel extends BaseModel
     }
 
     /**
+     * Change password
+     * 
+     * @param username
+     * @param old-password
+     * @param new-password
+     */
+    public function changePassword(Array $data) {
+        
+        # Check if parameters exist
+        $parameters = ['username', 'old-password', 'new-password'];
+        foreach ($data as $key => $item) {
+            if (!in_array($key, $parameters)) {
+                return [
+                    'success'   => false,
+                    'code'      => 'DB_ACCOUNT_MODEL_PARAM',
+                    'message'   => "Parameter . $item .  does not exist"
+                ];
+            }
+        }
+
+        # Check if old-password is correct
+        $hash_pwd = md5($data['old-password']);
+        $count_pwd = "SELECT COUNT(*) as total FROM `" . DB_PREFIX . "users` WHERE username = :username AND password = :password LIMIT 1";
+        $result_count_pwd = $this->db->query($count_pwd, [
+            ':username' => $data['username'],
+            ':password' => $hash_pwd
+        ])->row('total');
+
+        # Start change password md5
+        if ($result_count_pwd > 0 ) {
+            
+            $update_pwd = "UPDATE `" . DB_PREFIX . "users` SET password = :password WHERE username = :username";
+            $affected_rows = $this->db->query($update_pwd, [
+                ':username' => $data['username'],
+                ':password' => $hash_pwd
+            ])->rowsCount();
+
+            if ($affected_rows > 0 ) {
+                return [
+                    'success'   => true,
+                    'message'   => 'Updated password for username ' . $data['username']
+                ];
+            } else {
+                return [
+                    'success'   => false,
+                    'code'      => 'DB_ACCOUNT_MODEL_OPERATOR',
+                    'message'   => 'There is an error inserting data into database'
+                ];
+            }
+        }
+
+        return [
+            'success'   => false,
+            'code'      => 'DB_ACCOUNT_MODEL_RECORD',
+            'message'   => 'Record does not exist in database'
+        ];
+    } 
+
+
+    /**
      * List users
      * 
      * @param offset optional default 0
