@@ -48,12 +48,13 @@ class DataSubmit {
      * 
      * 
      * @important this does not support file type yet
+     * preg_split("/\\r\\n-{1,}[a-zA-Z0-9]*\d*-{0,2}\\r\\n(Content-Disposition: form-data; ){0,}/", array_shift($data))
      */
     private function parse_data() {
         $data = [];
        
         parse_str(file_get_contents('php://input', false , null, 0, $_SERVER['CONTENT_LENGTH'] ), $data);
-        $data_lines = preg_split("/\\r\\n----------------------------\d*-{0,2}\\r\\n(Content-Disposition: form-data; ){0,}/", array_shift($data));
+        $data_lines = preg_split("/\\r\\n-{1,}[a-zA-Z0-9]*\d*-{0,2}\\r\\n(Content-Disposition: form-data; ){0,}/", array_shift($data));
         $headers = [];
 
         foreach($data_lines as $line) {
