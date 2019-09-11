@@ -79,31 +79,38 @@ class AccountModel extends BaseModel
         
         # Check if parameters exist
         $parameters = ['username', 'old-password', 'new-password'];
-        foreach ($data as $key => $item) {
-            if (!in_array($key, $parameters)) {
+        foreach($parameters as $param) {
+            if (empty($data[$param])) {
                 return [
                     'success'   => false,
                     'code'      => 'DB_ACCOUNT_MODEL_PARAM',
-                    'message'   => "Parameter . $item .  does not exist"
+                    'message'   => "Parameter $param does not exist or empty"
                 ];
             }
         }
 
         # Check if old-password is correct
-        $hash_pwd = md5($data['old-password']);
-        $count_pwd = "SELECT COUNT(*) as total FROM `" . DB_PREFIX . "users` WHERE username = :username AND password = :password LIMIT 1";
-        $result_count_pwd = $this->db->query($count_pwd, [
-            ':username' => $data['username'],
-            ':password' => $hash_pwd
-        ])->row('total');
+        $new_hash_pwd = password_hash($data['new-password'], PASSWORD_BCRYPT);
+        $db_user_pwd = "SELECT password FROM `" . DB_PREFIX . "users` WHERE username = :username LIMIT 1";
+        $result_db_user_pwd = $this->db->query($db_user_pwd, [
+            ':username' => $data['username']
+        ])->row('password');
+            
+        if (!$result_db_user_pwd) {
+            return [
+                'success'   => false,
+                'code'      => 'DB_ACCOUNT_MODEL_QUERY',
+                'message'   => 'There is no account for ' . $data['username']
+            ];
+        }
 
         # Start change password md5
-        if ($result_count_pwd > 0 ) {
+        if (password_verify($data['old-password'], $result_db_user_pwd)) {
             
             $update_pwd = "UPDATE `" . DB_PREFIX . "users` SET password = :password WHERE username = :username";
             $affected_rows = $this->db->query($update_pwd, [
                 ':username' => $data['username'],
-                ':password' => $hash_pwd
+                ':password' => $new_hash_pwd
             ])->rowsCount();
 
             if ($affected_rows > 0 ) {
@@ -114,7 +121,7 @@ class AccountModel extends BaseModel
             } else {
                 return [
                     'success'   => false,
-                    'code'      => 'DB_ACCOUNT_MODEL_OPERATOR',
+                    'code'      => 'DB_ACCOUNT_MODEL_QUERY',
                     'message'   => 'There is an error inserting data into database'
                 ];
             }
@@ -123,7 +130,7 @@ class AccountModel extends BaseModel
         return [
             'success'   => false,
             'code'      => 'DB_ACCOUNT_MODEL_RECORD',
-            'message'   => 'Record does not exist in database'
+            'message'   => 'Password is incorrect'
         ];
     } 
 
