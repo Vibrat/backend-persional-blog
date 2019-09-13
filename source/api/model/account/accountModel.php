@@ -213,6 +213,10 @@ class AccountModel extends BaseModel
             ];
         }
 
+        if (!isset($data['name']) || empty($data['name']) || !is_string($data['name'])) {
+            $data['name']   = false;
+        }
+
         if (!isset($data['group']) || !is_string($data['group'])) {
             $data['group'] = false;
         }
@@ -221,12 +225,16 @@ class AccountModel extends BaseModel
             $bind_params[':group'] = $data['group'];
         }
 
+        if ($data['name']) {
+            $bind_params[':name'] = $data['name'] . '%';
+        }
+
         # Query Statistics
-        $sql  = "SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "users` u";
+        $sql  = "SELECT COUNT(*) as total FROM `" . DB_PREFIX . "users` u";
         $sql .= " LEFT JOIN `" . DB_PREFIX . "users_permission` p ON (u.id = p.user_id)" .  
-                        " LEFT JOIN `" . DB_PREFIX . "users_group` g  ON (p.group_permission_id = g.id)";
-        $sql .= ($data['group'] ? " WHERE g.`name` = :group" : "");
-        $sql .= " GROUP BY u.`id`, u.`username`";
+                        " LEFT JOIN `" . DB_PREFIX . "users_group` g  ON (p.group_permission_id = g.id) WHERE 1 = 1";
+        $sql .= ($data['group'] ? " AND g.`name` = :group" : "");
+        $sql .= ($data['name'] ?  " AND u.`username` LIKE :name" : "");
 
         $query = $this->db->query($sql, $bind_params);
         $total = $query->row('total');
@@ -234,8 +242,9 @@ class AccountModel extends BaseModel
         # Query Data
         $sql_account = "SELECT u.`id`, u.`username`, JSON_OBJECTAGG(IFNULL(g.id, '_'), IFNULL(g.name, '_')) AS `group` FROM `" . DB_PREFIX . "users` u";
         $sql_account .= " LEFT JOIN `" . DB_PREFIX . "users_permission` p ON (u.id = p.user_id)" .  
-                        " LEFT JOIN `" . DB_PREFIX . "users_group` g  ON (p.group_permission_id = g.id)";
-        $sql_account .= ($data['group'] ? " WHERE g.`name` = :group" : "");
+                        " LEFT JOIN `" . DB_PREFIX . "users_group` g  ON (p.group_permission_id = g.id) WHERE 1 = 1";
+        $sql_account .= ($data['group'] ? " AND g.`name` = :group" : "");
+        $sql_account .= ($data['name'] ?  " AND u.`username` LIKE :name" : "");
         $sql_account .= " GROUP BY u.`id`, u.`username`";
         $sql_account .= " LIMIT " . $data['offset'] . ", " . $data['limit'] . "";
 

@@ -247,10 +247,11 @@ class BasicAuthController extends Controller
     /**
      * List users
      * 
-     * @endpoint GET api=account/basic-auth/list&offset=<>&limit=<>&group=<>
+     * @endpoint GET api=account/basic-auth/list&offset=<>&limit=<>&group=<>&name=<>
      * @param token
      * @param offset optional
      * @param limit optional default 100
+     * @param name  optionnal
      * @param group optional default *
      */
     public function list()
