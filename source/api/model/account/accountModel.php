@@ -222,7 +222,7 @@ class AccountModel extends BaseModel
         }
 
         if ($data['group']) {
-            $bind_params[':group'] = $data['group'];
+            $bind_params[':group'] = $data['group'] . '%';
         }
 
         if ($data['name']) {
@@ -233,7 +233,7 @@ class AccountModel extends BaseModel
         $sql  = "SELECT COUNT(*) as total FROM `" . DB_PREFIX . "users` u";
         $sql .= " LEFT JOIN `" . DB_PREFIX . "users_permission` p ON (u.id = p.user_id)" .  
                         " LEFT JOIN `" . DB_PREFIX . "users_group` g  ON (p.group_permission_id = g.id) WHERE 1 = 1";
-        $sql .= ($data['group'] ? " AND g.`name` = :group" : "");
+        $sql .= ($data['group'] ? " AND g.`name` LIKE :group" : "");
         $sql .= ($data['name'] ?  " AND u.`username` LIKE :name" : "");
 
         $query = $this->db->query($sql, $bind_params);
@@ -243,7 +243,7 @@ class AccountModel extends BaseModel
         $sql_account = "SELECT u.`id`, u.`username`, JSON_OBJECTAGG(IFNULL(g.id, '_'), IFNULL(g.name, '_')) AS `group` FROM `" . DB_PREFIX . "users` u";
         $sql_account .= " LEFT JOIN `" . DB_PREFIX . "users_permission` p ON (u.id = p.user_id)" .  
                         " LEFT JOIN `" . DB_PREFIX . "users_group` g  ON (p.group_permission_id = g.id) WHERE 1 = 1";
-        $sql_account .= ($data['group'] ? " AND g.`name` = :group" : "");
+        $sql_account .= ($data['group'] ? " AND g.`name` LIKE :group" : "");
         $sql_account .= ($data['name'] ?  " AND u.`username` LIKE :name" : "");
         $sql_account .= " GROUP BY u.`id`, u.`username`";
         $sql_account .= " LIMIT " . $data['offset'] . ", " . $data['limit'] . "";
