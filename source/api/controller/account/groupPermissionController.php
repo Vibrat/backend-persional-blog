@@ -368,6 +368,45 @@ class GroupPermissionController extends Controller
   }
 
   /**
+   * Check if a group exists
+   * 
+   * @endpoint GET apt=account/group-permission/is-group-exist&group=<>&token=<>
+   * @param group
+   * @param token
+   */
+  public function isGroupExist()
+  {
+    if ($this->http->method() != 'GET') {
+      $this->json->sendBack([
+        'success' => false,
+        'code'    => '401',
+        'message' => 'This api only supports `GET` method'
+      ]);
+      return;
+    }
+
+    $get_data = $this->http->data('GET');
+    if ($this->user->isTokenValid($get_data['token'])) {
+      $this->model->load('account/group');
+
+      $response = $this->model->group->isGroupExist($get_data);
+
+      $this->json->sendBack([
+        'success' => $response['success'] && $response['total'] > 0 ? true : false,
+        'code'    => 200,
+        'total'   => $response['total']
+      ]);
+      return;
+    }
+
+    $this->json->sendBack([
+      'success' => false,
+      'code'    => 403,
+      'message' => 'Unauthenticated'
+    ]);
+  }
+
+  /**
    * Remove a user from group by name
    * 
    * @endpoint DELETE api=account/group-permission/remove-user-from-group-by-name&token=<>&userId=<>&groupname=<>

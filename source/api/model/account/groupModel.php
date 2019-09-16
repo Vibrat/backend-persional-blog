@@ -74,6 +74,31 @@ class GroupModel extends BaseModel
     }
 
     /**
+     * Check if a group exists
+     * 
+     * @param group
+     */
+    public function isGroupExist($data) {
+        if (!isset($data['group']) && !is_string($data['group'])) {
+            return [
+                'success'   => false,
+                'code'      => 'MODEL_ACCOUNT_GROUP',
+                'message'   => 'parameter `group does not exist`'
+            ];
+        }
+
+        $sql = "SELECT COUNT(*) as total FROM `" . DB_PREFIX . "users_group` WHERE name = :group LIMIT 1";
+        $result = $this->db->query($sql, [
+            ':group'    => $data['group']
+        ])->row('total');
+
+        return [
+            'success'   => true,
+            'total'     => $result
+        ];
+    }
+
+    /**
      * count number of records in table 'users_group' 
      * 
      * @param string $group_name name of group to search
