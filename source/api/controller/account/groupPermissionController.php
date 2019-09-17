@@ -103,6 +103,83 @@ class GroupPermissionController extends Controller
   }
 
   /**
+   * List all permissions in the application
+   * 
+   * @endpoint GET api=account/group-permission/list-all-permission&token=<>
+   * @access public
+   */
+  public function listAllPermissions()
+  {
+
+    if ($this->http->method() != 'GET') {
+      $this->json->sendBack([
+        'success' => false,
+        'message' => 'API only support method GET'
+      ]);
+
+      return;
+    }
+
+    $get_data = $this->http->data('GET');
+    if ($this->user->isTokenValid($get_data['token'])) {
+
+      function recursive_path($initial_path)
+      {
+        
+        $controller_path = 'Controller.php';
+
+        // Recursively parse paths
+        foreach ($permissions = glob($initial_path) as $index => $path) {
+          
+          if (is_dir($path)) {
+            
+            foreach (recursive_path($path . "/*") as $sub_path) {
+              $permissions[] = $sub_path;
+            }
+
+          } else if (substr($path, -strlen($controller_path), strlen($controller_path)) != $controller_path) {
+            
+            // remove uneccessary paths
+            unset($permissions[$index]);
+          } else {
+
+            // Rebuild path
+            $new_path = "";
+            $path = str_replace($controller_path, "", $path);
+
+            foreach (str_split($path) as $key => $char) {
+              if (strtoupper($char) == $char && $char != '/') {
+                $new_path .= ($key ? '-' : "") . strtolower($char);
+              } else {
+                $new_path .= $char;
+              }
+            }
+
+            $permissions[$index] = $new_path;
+          }
+        }
+
+        return $permissions;
+      }
+
+      $permissions = recursive_path(BASE_CONTROLLER . "*");
+
+      $this->json->sendBack([
+        'success' => true,
+        'data' => [
+          'api' => $permissions
+        ]
+      ]);
+      return;
+    }
+
+    $this->json->sendBack([
+      'success' => false,
+      'message' => 'Invalid token'
+    ]);
+  }
+
+  /**
    * Add single permission into collumn `users_group.permission`
    * 
    * @endpoint POST api=account/group-permission/add-permission?token=<>

@@ -1,4 +1,5 @@
 <?php
+
 namespace Authenticator;
 
 /**
@@ -6,7 +7,8 @@ namespace Authenticator;
  *
  * Design by Lam Nguyen
  */
-class Authenticator {
+class Authenticator
+{
     /**
      * @var String $username
      * @var String $password
@@ -19,14 +21,14 @@ class Authenticator {
      * @var \Token\Token 
      */
     public  $tokener;
-    
+
     /** @var \MysqliDatabase $db */
     private $db;
 
     function __construct(
-        \MysqliDatabase $db, 
-        \Token\Token $tokener) 
-        {
+        \MysqliDatabase $db,
+        \Token\Token $tokener
+    ) {
 
         /** assign database connection for future use */
         $this->db = $db;
@@ -34,7 +36,7 @@ class Authenticator {
         ## save tokener into Authenticator
         if ($tokener instanceof \Token\Token) {
             $this->tokener = $tokener;
-            $this->isLogged = ($this->tokener->token ? true : false) ;
+            $this->isLogged = ($this->tokener->token ? true : false);
         }
     }
 
@@ -44,7 +46,8 @@ class Authenticator {
      * @param  String $token
      * @return Bool
      */
-    public function isLogged() {
+    public function isLogged()
+    {
         return $this->isLogged;
     }
 
@@ -55,7 +58,8 @@ class Authenticator {
      * @param String $permission_url post/account/new
      * @return Boolean 
      */
-    public function isTokenValid($token, $permission_url = false) {
+    public function isTokenValid($token, $permission_url = false)
+    {
 
         $permission_url = ($permission_url ? $permission_url : $_GET['api']);
 
@@ -75,22 +79,29 @@ class Authenticator {
 
         ## Decode permissions string
         $permissions = json_decode($query_permission->row('permission'));
-        if ($permissions) {
-            $permissions = $permissions->api;
+        $permissions = $permissions ? $permissions->api : [];
+        $is_authenticated = false;
+
+        foreach ($permissions as $permission) {
+            if (substr($permission_url, 0, strlen($permission)) == $permission) {
+                $is_authenticated = true;
+                break;
+            }
         }
 
-        if (in_array($permission_url, ($permissions ? $permissions : [])) || $user_id == 1) {
-           
+        if ($is_authenticated || $user_id == 1) {
+
             $query = $this->db->query(sprintf(
                 AUTHENTICATOR_CHECK_TOKEN,
-                DB_PREFIX, 
-                $token)); 
+                DB_PREFIX,
+                $token
+            ));
 
             if ($query->row('total')) {
                 return true;
-            }   
+            }
         }
-           
+
         return;
     }
 
@@ -99,38 +110,45 @@ class Authenticator {
      * 
      * @param Array $credentials ['username'=> 'lam-nguyen', 'password' => '12312731562' ]
      */
-    public function login(Array $credentials) {
+    public function login(array $credentials)
+    {
 
         /** @var Response Connection */
         $row = $this->db->query(sprintf(
-            AUTHENTICATOR_COUNT_USERS, 
-            DB_PREFIX, 
-            $credentials['username']))->row();
-    
+            AUTHENTICATOR_COUNT_USERS,
+            DB_PREFIX,
+            $credentials['username']
+        ))->row();
+
         if (password_verify($credentials['password'], $row['password'])) {
-            
+
             $token = $this->tokener->createToken();
             $numTokens = $this->db->query(sprintf(
-                AUTHENTICATOR_COUNT_TOKENS, 
-                DB_PREFIX, 
-                $row['id']))->row('total');
-                
+                AUTHENTICATOR_COUNT_TOKENS,
+                DB_PREFIX,
+                $row['id']
+            ))->row('total');
+
             if ($numTokens) {
-                
+
                 $this->db->query(sprintf(
-                    AUTHENTICATOR_UPDATE_TOKENS, 
-                    DB_PREFIX, 
-                    $token, $row['id']));
+                    AUTHENTICATOR_UPDATE_TOKENS,
+                    DB_PREFIX,
+                    $token,
+                    $row['id']
+                ));
                 return $token;
-            } 
-                
+            }
+
             $this->db->query(sprintf(
-                AUTHENTICATOR_INSERT_TOKENS, 
-                DB_PREFIX, 
-                $token, $row['id']));
-            return $token;       
+                AUTHENTICATOR_INSERT_TOKENS,
+                DB_PREFIX,
+                $token,
+                $row['id']
+            ));
+            return $token;
         }
-    
+
         return false;
     }
 }
