@@ -40,7 +40,7 @@ DROP TABLE IF EXISTS `users_group`;
 CREATE TABLE `users_group` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `permission` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `permission` LONGTEXT COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   INDEX (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
