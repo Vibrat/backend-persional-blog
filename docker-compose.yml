@@ -1,44 +1,44 @@
 version: '3.4'
 
-services: 
-  
-  rest-api: 
+services:
+
+  rest-api:
     image: ${IMAGE}:${BUILD_NUMBER}
     restart: always
-    networks: 
+    networks:
       - rest-api
     command: >
       sh -c "php /var/init/index.php
-      && apachectl -D FOREGROUND"   
-    volumes: 
+      && apachectl -D FOREGROUND"
+    volumes:
       - ./source:/var/www/html
       - ./init:/var/init
-    ports: 
+    ports:
       - 81:80
     depends_on:
-      - 'db_blog'  
+      - 'db_blog'
     environment:
       - MYSQL_ROOT_PASSWORD=123456789
-   
+
   db_blog:
     container_name: db_blog
     command: --default-authentication-plugin=mysql_native_password
     image: mysql:8.0
     restart: always
-    networks: 
+    networks:
       - rest-api
     ports:
       - 3306:3306
     environment:
       - MYSQL_ROOT_PASSWORD=123456789
 
-  # adminer:
-  #   container_name: adminer
-  #   image: adminer:latest
-  #   restart: always
-  #   ports:
-  #     - 8080:8080
+  adminer:
+    container_name: adminer
+    image: adminer:latest
+    restart: always
+    ports:
+      - 8080:8080
 
 networks:
   rest-api:
-    external: false 
+    external: false
