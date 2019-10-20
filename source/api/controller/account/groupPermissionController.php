@@ -2,7 +2,7 @@
 
 /**
  * Group Permissions
- * 
+ *
  * @method newGroupPermissions api=post/account/group-permission/new-group
  * @var \Http\DataSubmit $this->http
  * @var \Authenticator\Authenticator $this->user
@@ -15,7 +15,7 @@ class GroupPermissionController extends Controller
 
   /**
    * List group of permissions
-   * 
+   *
    * @endpoint GET api=account/group-permission/list&token=<>&offset=<>&&limit=<>
    * @access public
    */
@@ -65,7 +65,7 @@ class GroupPermissionController extends Controller
 
   /**
    * List permissions of a  group
-   * 
+   *
    * @endpoint api=account/group-permissions/list-permissions&id=<>&token=<>
    * @param int id group id
    * @param string token
@@ -104,7 +104,7 @@ class GroupPermissionController extends Controller
 
   /**
    * List all permissions in the application
-   * 
+   *
    * @endpoint GET api=account/group-permission/list-all-permission&token=<>
    * @access public
    */
@@ -125,20 +125,20 @@ class GroupPermissionController extends Controller
 
       function recursive_path($initial_path)
       {
-        
+
         $controller_path = 'Controller.php';
 
         // Recursively parse paths
         foreach ($permissions = glob($initial_path) as $index => $path) {
-          
+
           if (is_dir($path)) {
-            
+
             foreach (recursive_path($path . "/*") as $sub_path) {
               $permissions[] = $sub_path;
             }
 
           } else if (substr($path, -strlen($controller_path), strlen($controller_path)) != $controller_path) {
-            
+
             // remove uneccessary paths
             unset($permissions[$index]);
           } else {
@@ -181,7 +181,7 @@ class GroupPermissionController extends Controller
 
   /**
    * Add single permission into collumn `users_group.permission`
-   * 
+   *
    * @endpoint POST api=account/group-permission/add-permission?token=<>
    * @param string $data['name'] group name
    * @param string $permission permission json string
@@ -276,11 +276,11 @@ class GroupPermissionController extends Controller
 
   /**
    * Update all permissions in table users_permission
-   * 
+   *
    * @endpoint PUT api=account/group-permission/update-group-permission&token=<>
    * @param string name ngroup name
-   * @param string[] permissions 
-   * @access public 
+   * @param string[] permissions
+   * @access public
    */
   public function updateGroupPermission()
   {
@@ -338,8 +338,59 @@ class GroupPermissionController extends Controller
   }
 
   /**
+   * Update a permission for a group
+   *
+   * @endpoint PUT api=account/group-permission/update-permission
+   * @param string state 'true' or 'false'
+   * @param string group group name
+   * @param string or | string permission
+   * @access public with token
+   */
+  public function updatePermission() {
+    if ($this->http->method() !== 'PUT'){
+      $this->json->sendBack([
+        'success'   => false,
+        'code'      => 401,
+        'message'   => 'This API only supports method `PUT`'
+      ]);
+      return;
+    }
+
+    $get_data = $this->http->data('GET');
+    if ($this->user->isTokenValid($get_data['token'])) {
+
+      $this->model->load('account/group');
+      $put_data = $this->http->data('PUT');
+
+      // change state to php bool
+      switch($put_data['state']) {
+        case 'true':
+          $put_data['state']  = true;
+          break;
+        case 'false':
+          $put_data['state']  = false;
+          break;
+        default:
+          $put_data['state'] = null;
+      }
+
+      $response = $this->model->group->updatePermission($put_data);
+
+      // Perform action change
+      $this->json->sendBack($response);
+      return;
+    }
+
+    $this->json->sendBack([
+      'success'   => false,
+      'code'      => 404,
+      'message'   => 'Toke is invalid'
+    ]);
+  }
+
+  /**
    * Add a user to group
-   * 
+   *
    * @endpoint POST account/group-permissions/add-user-to-group&token=<>
    * @param token
    * @param userId `root, VIP2`
@@ -394,7 +445,7 @@ class GroupPermissionController extends Controller
 
   /**
    * Add a user to group by groupname
-   * 
+   *
    * @endpoint POST api=account/group/add-user-to-group-by-name&token=<>
    * @param userId
    * @param groupname
@@ -446,7 +497,7 @@ class GroupPermissionController extends Controller
 
   /**
    * Check if a group exists
-   * 
+   *
    * @endpoint GET apt=account/group-permission/is-group-exist&group=<>&token=<>
    * @param group
    * @param token
@@ -485,7 +536,7 @@ class GroupPermissionController extends Controller
 
   /**
    * Remove a user from group by name
-   * 
+   *
    * @endpoint DELETE api=account/group-permission/remove-user-from-group-by-name&token=<>&userId=<>&groupname=<>
    * @return [
    *      'success'   => boolean,
@@ -545,11 +596,11 @@ class GroupPermissionController extends Controller
 
   /**
    * delete a group contact
-   * 
-   * @endpoint DELETE 
+   *
+   * @endpoint DELETE
    * @param string token
    * @param string  name group name to delete
-   * @access public 
+   * @access public
    */
   public function delete()
   {
