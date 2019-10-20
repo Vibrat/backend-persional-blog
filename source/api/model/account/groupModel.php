@@ -346,7 +346,10 @@ class GroupModel extends BaseModel
             if (is_numeric($permission_index)) {
                 // remove permission
                 if ($data['state'] == false) {
+
+                    // unset data and remove index when json_encode
                     unset($permissions->api[$permission_index]);
+                    $permissions->api = array_values($permissions->api);
                 }
             } elseif ($data['state'] == true) {
                 // append permission
