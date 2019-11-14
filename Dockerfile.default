@@ -28,7 +28,6 @@ COPY ./server/xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
     
 COPY ./source/ /var/www/html/
 COPY ./init/ /var/init/
-COPY ./server/ /var/server/
-COPY ./server/apache/ports.conf /etc/apache2/ports.conf        
+COPY ./server/ /var/server/    
 
-CMD docker-php-entrypoint apache2-foreground
+RUN service apache2 restart
