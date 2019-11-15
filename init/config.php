@@ -15,11 +15,11 @@ define("API_PATH",      DIR_PATH . "api/");
 
 ## Database Config
 define("DEPLOYMENT_SERVER", getenv('SERVER_NAME'));
-define("USER_NAME",   DEPLOYMENT_SERVER ? getenv("DATABASE_USER") : "root");
-define("PASSWORD",    DEPLOYMENT_SERVER ? getenv("DATABASE_PASS") :  "123456789");
-define("DATABASE",    DEPLOYMENT_SERVER ? getenv("DATABASE_URL")  : "db_blog");
-define("DB_PORT",       "3306");
-define("DB_NAME",     DEPLOYMENT_SERVER ? getenv("DATABASE_NAME") : "rest_api");
+define("USER_NAME",     DEPLOYMENT_SERVER == "heroku" ? getenv("DATABASE_USER") : "root");
+define("PASSWORD",      DEPLOYMENT_SERVER == "heroku" ? getenv("DATABASE_PASS") : "123456789");
+define("DATABASE",      DEPLOYMENT_SERVER == "heroku" ? getenv("DATABASE_URL")  : "db_blog");
+define("DB_PORT",       DEPLOYMENT_SERVER == "heroku" ? getenv("DATABASE_PORT") : "3306");
+define("DB_NAME",       DEPLOYMENT_SERVER == "heroku" ? getenv("DATABASE_NAME") : "rest_api");
 define("DB_PREFIX",     "");
 
 ## For MVC Model

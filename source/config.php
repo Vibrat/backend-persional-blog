@@ -15,11 +15,12 @@ define("DB_DIR",        DIR_PATH . "database/");
 define("API_PATH",      DIR_PATH . "api/");
 
 ## Database Config
-define("USER_NAME",     "root");
-define("PASSWORD",      "123456789");
-define("DATABASE",      "db_blog");
-define("DB_PORT",       "3306");
-define("DB_NAME",       "rest_api");
+define("DEPLOYMENT_SERVER", getenv('SERVER_NAME'));
+define("USER_NAME",     DEPLOYMENT_SERVER == "heroku" ? getenv("DATABASE_USER") : "root");
+define("PASSWORD",      DEPLOYMENT_SERVER == "heroku" ? getenv("DATABASE_PASS") : "123456789");
+define("DATABASE",      DEPLOYMENT_SERVER == "heroku" ? getenv("DATABASE_URL")  : "db_blog");
+define("DB_PORT",       DEPLOYMENT_SERVER == "heroku" ? getenv("DATABASE_PORT") : "3306");
+define("DB_NAME",       DEPLOYMENT_SERVER == "heroku" ? getenv("DATABASE_NAME") : "rest_api");
 define("DB_PREFIX",     "");
 
 ## For MVC Model
@@ -34,4 +35,4 @@ define("SERVICE_API_KEY", "ABSD9810324000");
 ## KEY ENV
 define('APPLICATION', 1);
 define('APPLICATION_TEST', 0);
-define('OPTION_HTTP_MAX_SIZE_SUPPORT', 10485760); // Max 10Mb 
+define('OPTION_HTTP_MAX_SIZE_SUPPORT', 10485760); // Max 10Mb
