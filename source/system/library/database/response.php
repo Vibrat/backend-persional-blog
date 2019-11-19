@@ -3,7 +3,7 @@ namespace Database;
 
 /**
  * Class which handles response return from Database
- * 
+ *
  * @Flow\Scope(")
  */
  class DbResponse {
@@ -16,14 +16,14 @@ namespace Database;
 
     /**
      * Database Connection
-     * 
+     *
      * @var PDO | boolean
      */
     public $connection;
 
     /**
      * Initiate Connection, assign PDOStatement to a class
-     * 
+     *
      * @param PDOStatement
      */
     public function initDataConnection($query, $connection = false) {
@@ -33,7 +33,7 @@ namespace Database;
 
     /**
      * Return a next row value from results
-     * 
+     *
      * @param String index of a row
      * @return (Array || Value)
      */
@@ -42,7 +42,7 @@ namespace Database;
         if(!$this->query) {
             return;
         }
-            
+
         /** @var PDOStatement $row */
         $row = $this->query->fetch(\PDO::FETCH_GROUP|\PDO::FETCH_ASSOC);
 
@@ -76,7 +76,7 @@ namespace Database;
      *    - 0 if the query does not generate AUTO_INCREMENT
      *    - numerial id  if the query generates AUTO_INCREMENT
      *    - false if no connection is made
-     * @return Number | false   
+     * @return Number | false
      */
     public function lastInsertId() {
         return ($this->connection ? $this->connection->lastInsertId() : false);

@@ -1,4 +1,4 @@
-<?php 
+<?php
  /**
   * APPLICATION BOOTSTRAP
   * 1. Require config
@@ -26,7 +26,7 @@
 
   ## Load Model
   if (is_dir(MODEL_DIR)) {
-      foreach(glob(MODEL_DIR . "*") as $file) { 
+      foreach(glob(MODEL_DIR . "*") as $file) {
         if (file_exists($file)) require_once $file;
       }
   }
@@ -45,19 +45,6 @@
   ## Launch aplication
   $app = new Application();
   $app->bootstrap('./launch.php');
-  
+
   ## Save app for implementation
   $GLOBALS['app'] = $app;
-
-
-
-  
-
-
-
-
-
-
-
-
-  

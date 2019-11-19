@@ -3,7 +3,7 @@ namespace System\Model;
 
 /**
  * MODEL CLASS - CORE ENGINE
- * 
+ *
  * user for engine not extension
  */
 final class Model {
@@ -18,10 +18,10 @@ final class Model {
             $this->deps[$key] = $value;
         }
     }
-    
+
     /**
      * Inject dependencies
-     * 
+     *
      * @param class $object
      * inject a object into Model
      */
@@ -43,11 +43,11 @@ final class Model {
         ## revise base url
         $items =  preg_split("/[\/\\\]/", $path);
 
-        ## init value and identifier  
+        ## init value and identifier
         $key = $items[count($items) - 1];
         $path = BASE_MODEL . $path . "Model.php";
         $className = ucwords($key . "Model");
-        
+
         if(file_exists($path)) {
             include_once $path;
 
@@ -56,7 +56,7 @@ final class Model {
 
             return;
         }
-            
+
         trigger_error('file does not exist in path' . $path, E_USER_ERROR);
     }
  }

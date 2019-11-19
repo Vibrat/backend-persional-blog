@@ -16,15 +16,18 @@ CREATE TABLE `navigation_all` (
 
 DROP TABLE IF EXISTS `navigation`;
 CREATE TABLE `navigation` (
-    `id` INT(11) UNIQUE NOT NULL AUTO_INCREMENT,
+    `id` INT(11) NOT NULL,
     `groupId` INT(11)   NOT NULL,
     `enable` BOOLEAN DEFAULT 0,
-    PRIMARY KEY (`id`),
-    KEY (`groupId`),
+    KEY (`groupId`, `id`),
     CONSTRAINT `navigation__users_group` FOREIGN KEY (`groupId`) REFERENCES `users_group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `navigation__navigation_all` FOREIGN KEY (`id`) REFERENCES `navigation_all` (`id`) ON DELETE CASCADE ON UPDATE CASCADE 
+    CONSTRAINT `navigation__navigation_all` FOREIGN KEY (`id`) REFERENCES `navigation_all` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-INSERT INTO `navigation_all` (`menu`, `link`, `children`) VALUES 
+INSERT INTO `navigation_all` (`menu`, `link`, `children`) VALUES
 ('account', '/admin/dashboard/account', ''),
-('group', '/admin/dashboard/group', '');
+('group', '/admin/dashboard/group', ''),
+('navigation', '/admin/navigation', ''),
+('menu', '/admin/menu', ''),
+('blog', '/admin/blog', ''),
+('file', '/admin/file', '');
