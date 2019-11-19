@@ -30,8 +30,9 @@ class PrivateModel extends BaseModel
     $input = [
       'groupId' => $data['groupId'],
       'menu'    => $data['menu'],
-      'order'   => isset($data['order']) && is_int($data['order']) ? $data['order'] : 0,
-      'link'    => isset($data['link']) ? $data['link'] : ''
+      'order'   => isset($data['order']) && is_numeric($data['order']) ? $data['order'] : 0,
+      'link'    => isset($data['link']) ? $data['link'] : '',
+      'enable'  => isset($data['enable']) && is_numeric($data['enable']) ? $data['enable'] : 0
     ];
 
     $menuRes= $this->checkMenuExist($input);
@@ -58,16 +59,25 @@ class PrivateModel extends BaseModel
     ]);
 
     if ($checkRecordExist['success']) {
-      return [
-        'success' => false,
-        'message' => sprintf('Record already added')
-      ];
+      $sql = "UPDATE `" . DB_PREFIX . "navigation` SET enable = :enable, `order` = :order WHERE id = :id AND groupId = :groupId";
+
+      if (!isset($data['enable'])) {
+        $input['enable'] = $checkRecordExist['data']['enable'];
+      }
+
+      if (!isset($data['order'])) {
+        $input['order'] = $checkRecordExist['data']['order'];
+      }
+
+    } else {
+      $sql = "INSERT INTO `" . DB_PREFIX . "navigation` SET id = :id, groupId = :groupId, enable = :enable, `order` = :order";
     }
 
-    $sql_add = "INSERT INTO `" . DB_PREFIX . "navigation` SET id = :id, groupId = :groupId, enable = 1";
-    $query = $this->db->query($sql_add, [
+    $query = $this->db->query($sql, [
       ':id'       => $menuRes['data']['id'],
       ':groupId'  => $input['groupId'],
+      ':enable'   => (int) $input['enable'],
+      ':order'    => (int) $input['order']
     ]);
 
     if ($query->rowsCount()) {
@@ -118,22 +128,24 @@ class PrivateModel extends BaseModel
       ];
     }
 
-    $sql = "SELECT COUNT(*) as total FROM `" . DB_PREFIX . "navigation` WHERE id = :id AND groupId = :groupId LIMIT 1";
+    $sql = "SELECT `id` AS `total`, `enable`, `order` FROM `" . DB_PREFIX . "navigation` WHERE id = :id AND groupId = :groupId LIMIT 1";
     $query = $this->db->query($sql, [
       ':id'       => $data['id'],
       ':groupId'  => $data['groupId']
     ]);
-
-    if ($query->row('total')) {
+    $response = $query->row();
+    if ($response['total']) {
       return [
         'success' => true,
-        'message' => 'Record exists'
+        'message' => 'Record exists',
+        'data'    => $response
       ];
     }
 
     return [
       'success' => false,
-      'message' => 'Record does not exist'
+      'message' => 'Record does not exist',
+      'data'    => $response
     ];
   }
 

@@ -19,6 +19,7 @@ CREATE TABLE `navigation` (
     `id` INT(11) NOT NULL,
     `groupId` INT(11)   NOT NULL,
     `enable` BOOLEAN DEFAULT 0,
+    `order` INT(11) DEFAULT 0,
     KEY (`groupId`, `id`),
     CONSTRAINT `navigation__users_group` FOREIGN KEY (`groupId`) REFERENCES `users_group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `navigation__navigation_all` FOREIGN KEY (`id`) REFERENCES `navigation_all` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
