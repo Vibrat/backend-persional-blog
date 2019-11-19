@@ -2,7 +2,6 @@
 
 class PrivateModel extends BaseModel
 {
-
   public function getMenuTree()
   {
     $sql = "SELECT * FROM `" . DB_PREFIX . "navigation_all`";
@@ -11,7 +10,7 @@ class PrivateModel extends BaseModel
     return $query->rows();
   }
 
-  public function addMenu(array $data)
+  public function changeMenu(array $data)
   {
     if (!isset($data['menu']) || empty($data['menu'])) {
       return [
@@ -28,7 +27,7 @@ class PrivateModel extends BaseModel
     }
 
     $input = [
-      'groupId' => $data['groupId'],
+      'name'    => $data['name'],
       'menu'    => $data['menu'],
       'order'   => isset($data['order']) && is_numeric($data['order']) ? $data['order'] : 0,
       'link'    => isset($data['link']) ? $data['link'] : '',
@@ -44,18 +43,19 @@ class PrivateModel extends BaseModel
     }
 
     $checkGroupExist = $this->checkGroupExist([
-      'id'  => $input['groupId']
+      'name'  => $input['name']
     ]);
+
     if (!$checkGroupExist['success']) {
       return [
         'success' => false,
-        'message' => sprintf('Group `%s` does not exist', $input['groupId'])
+        'message' => sprintf('Group `%s` does not exist', $input['name'])
       ];
     }
 
     $checkRecordExist = $this->checkMenuRuleForGroup([
       'id'        => $menuRes['data']['id'],
-      'groupId'   => $input['groupId']
+      'groupId'   => $checkGroupExist['data']['id']
     ]);
 
     if ($checkRecordExist['success']) {
@@ -75,7 +75,7 @@ class PrivateModel extends BaseModel
 
     $query = $this->db->query($sql, [
       ':id'       => $menuRes['data']['id'],
-      ':groupId'  => $input['groupId'],
+      ':groupId'  => $checkGroupExist['data']['id'],
       ':enable'   => (int) $input['enable'],
       ':order'    => (int) $input['order']
     ]);
@@ -133,6 +133,7 @@ class PrivateModel extends BaseModel
       ':id'       => $data['id'],
       ':groupId'  => $data['groupId']
     ]);
+
     $response = $query->row();
     if ($response['total']) {
       return [
@@ -150,28 +151,31 @@ class PrivateModel extends BaseModel
   }
 
   public function checkGroupExist(array $data) {
-    if (!isset($data['id'])) {
+    if (!isset($data['name'])) {
       return [
         'success' => false,
-        'message' => 'Parameter `id` does not exist'
+        'message' => 'Parameter `name` does not exist'
       ];
     }
 
-    $sql = "SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "users_group` WHERE id = :id LIMIT 1";
+    $sql = "SELECT id AS total, id FROM `" . DB_PREFIX . "users_group` WHERE name = :name LIMIT 1";
     $query = $this->db->query($sql, [
-      ':id' => $data['id']
+      ':name' => $data['name']
     ]);
 
-    if ($query->row('total')) {
+    $response = $query->row();
+    if ($response['total']) {
       return [
         'success' => true,
-        'message' => sprintf('Group `%s` exist', $data['id'])
+        'message' => sprintf('Group `%s` exist', $data['name']),
+        'data'    => $response
       ];
     }
 
     return [
       'success' => false,
-      'message' => sprintf('Group `%s` does not exist', $data['id'])
+      'message' => sprintf('Group `%s` does not exist', $data['name']),
+      'data'    => $response
     ];
   }
 }

@@ -56,7 +56,7 @@ class MenuController extends Controller {
   /**
    * Add/ Update a permission of navigation
    *
-   * @endpoint POST api=navigation/menu/change
+   * @Endpoint POST api=navigation/menu/change&token=<>
    */
   public function change() {
     if ($this->http->method() != 'POST') {
@@ -74,7 +74,7 @@ class MenuController extends Controller {
 
       // doing somthing here
       $post = $this->http->data('POST');
-      $result = $this->model->private->addMenu($post);
+      $result = $this->model->private->changeMenu($post);
 
       if ($result['success']) {
 
@@ -90,6 +90,36 @@ class MenuController extends Controller {
         'code'    => 400,
         'message' => $result['message']
       ]);
+      return;
+    }
+
+    $this->json->sendBack([
+      'success' => false,
+      'code'    => 401,
+      'message' => 'Unauthenticated'
+    ]);
+  }
+
+  /**
+   * Read a Navigation
+   *
+   * @Endpoint GET api=navigation/menu/read&token=<>
+   */
+  public function read() {
+    if ($this->http->method() != 'GET') {
+      $this->json->sendBack([
+        'success' => false,
+        'code'    => 403,
+        'message' => 'This Api only supports method `GET`'
+      ]);
+      return;
+    }
+
+    $get = $this->http->data('GET');
+    if($this->user->isTokenValid($get['token'])) {
+      $this->model->load('navigation/private');
+
+      // do sth
       return;
     }
 
