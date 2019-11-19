@@ -10,6 +10,23 @@ class PrivateModel extends BaseModel
     return $query->rows();
   }
 
+  public function getNavigation(array $data) {
+
+    if (!isset($data['menu']) || empty($data['menu'])) {
+      return [
+        'success' => false,
+        'message' => 'Parameter `menu` does not exist'
+      ];
+    }
+
+    if (!isset($data['group']) || empty($data['group'])) {
+      return [
+        'success' => false,
+        'message' => 'Parameter `group` does not exist'
+      ];
+    }
+  }
+
   public function changeMenu(array $data)
   {
     if (!isset($data['menu']) || empty($data['menu'])) {

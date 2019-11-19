@@ -119,7 +119,7 @@ class MenuController extends Controller {
     if($this->user->isTokenValid($get['token'])) {
       $this->model->load('navigation/private');
 
-      // do sth
+      $response = $this->model->private->getNavigation($get);
       return;
     }
 
