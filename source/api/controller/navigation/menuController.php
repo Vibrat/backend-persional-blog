@@ -120,6 +120,21 @@ class MenuController extends Controller {
       $this->model->load('navigation/private');
 
       $response = $this->model->private->getNavigation($get);
+      
+      if ($response['success']) {
+        $this->json->sendBack([
+          'success' => true,
+          'code'    => 200,
+          'data'    => $response['data']
+        ]);
+        return;
+      }
+
+      $this->json->sendBack([
+        'success' => false,
+        'code'    => 204,
+        'message' => $response['message']
+      ]); 
       return;
     }
 

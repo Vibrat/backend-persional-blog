@@ -12,19 +12,43 @@ class PrivateModel extends BaseModel
 
   public function getNavigation(array $data) {
 
-    if (!isset($data['menu']) || empty($data['menu'])) {
-      return [
-        'success' => false,
-        'message' => 'Parameter `menu` does not exist'
-      ];
-    }
-
     if (!isset($data['group']) || empty($data['group'])) {
       return [
         'success' => false,
         'message' => 'Parameter `group` does not exist'
       ];
     }
+
+    $sql_group = "SELECT id FROM `" . DB_PREFIX . "users_group` WHERE name = :name LIMIT 1";
+    $groupId = $this->db->query($sql_group, [
+      ':name' => $data['group']
+    ])->row('id');
+
+    $sql_navigation = 
+    "
+      SELECT g.id, n.menu, n.link, n.children FROM `" . DB_PREFIX . "navigation_all` n
+      LEFT JOIN `" . DB_PREFIX . "navigation` g ON n.id = g.id WHERE g.groupId = :groupId
+    ";
+
+    if ($groupId != false) {
+      
+      $result = $this->db->query($sql_navigation, [
+        ':groupId'  => $groupId
+      ])->rows();
+
+      $result = $result ? $result : [];
+
+      return  [
+        'success' => true,
+        'message' => 'Ok',
+        'data'    => $result
+      ];
+    }
+
+    return [
+      'success' => false,
+      'message' => 'Unable to find group match name'
+    ];
   }
 
   public function changeMenu(array $data)
