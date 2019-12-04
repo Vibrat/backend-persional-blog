@@ -280,4 +280,84 @@ class PrivateModel extends BaseModel
       'message' => 'Record does not exist'
     ];
   }
+
+  public function updateSnapshot(array $data)
+  {
+    $decoded = json_decode($data['data'], true);
+
+    try {
+      foreach ($decoded as $key => $item) {
+
+        $data = [
+          'name'  => $data['name'],
+          'menu'  => $item['menu'],
+          'order' => 0,
+          'enable'  => 1
+        ];
+
+        $response = $this->changeMenu($data);
+      }
+    } catch (Exception $e) {
+      return [
+        'success' => false,
+        'message' => $e->getMessage()
+      ];
+    }
+
+    $group = $this->getGroupIdByName($data);
+
+    if (!$group['success']) {
+      return $group['message'];
+    }
+
+    $navigation = $this->getNavigation([
+      'group' => $data['name']
+    ]);
+
+    $deleted = array_filter($navigation['data'], function ($item) use ($decoded) {
+      $values = array_map(function ($row) {
+        return $row['menu'];
+      }, $decoded);
+
+      return !in_array($item['menu'], $values);
+    });
+
+    foreach ($deleted as $record) {
+      $this->deleteNavigationById($record);
+    }
+
+    return [
+      'success' => true,
+      'message' => 'ok'
+    ];
+  }
+
+  public function getGroupIdByName(array $data)
+  {
+    if (!isset($data['name'])) {
+      return [
+        'success' => false,
+        'message' => 'Parameter `name` does not exist'
+      ];
+    }
+
+    $sql = "SELECT id FROM `" . DB_PREFIX . "users_group` WHERE name = :name LIMIT 1";
+    $query = $this->db->query($sql, [
+      ':name' => $data['name']
+    ]);
+
+    $id = $query->row('id');
+
+    if ($id != null) {
+      return [
+        'success' => true,
+        'data'   => $id
+      ];
+    } else {
+      return [
+        'success' => false,
+        'message' => 'Group does not exist'
+      ];
+    }
+  }
 }

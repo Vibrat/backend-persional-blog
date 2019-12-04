@@ -150,6 +150,45 @@ class MenuController extends Controller
   }
 
   /**
+   * Update a snapshot of permission by group name
+   *
+   * @Endpoint PUT api=navigation/menu/snapshot&token=<>
+   * @payload
+   *  ```
+   *  name: string; => group name
+   *  data: string; => stringified json
+   *  ```
+   */
+  public function snapshot()
+  {
+    if ($this->http->method() != 'PUT') {
+      $this->json->sendBack([
+        'success' => false,
+        'code'  => 403,
+        'message' => 'This api only supports method `PUT`'
+      ]);
+      return;
+    }
+
+    $get = $this->http->data('GET');
+    if ($this->user->isTokenValid($get['token'])) {
+
+      $put = $this->http->data('PUT');
+      $this->model->load('navigation/private');
+      $response = $this->model->private->updateSnapshot($put);
+
+      $this->json->sendBack($response);
+      return;
+    }
+
+    $this->json->sendBack([
+      'success' => false,
+      'code'  => 401,
+      'message' => 'Unauthenticated'
+    ]);
+  }
+
+  /**
    * Delete a record from table `navigation` by id
    *
    * @Endpoint DELETE api=navigation/menu/delete&token=<>
