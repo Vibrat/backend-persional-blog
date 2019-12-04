@@ -283,9 +283,10 @@ class PrivateModel extends BaseModel
 
   public function updateSnapshot(array $data)
   {
-    $decoded = json_decode($data['data'], true);
 
+    $decoded = json_decode($data['data'], true);
     try {
+      $this->db->beginTransaction();
       foreach ($decoded as $key => $item) {
 
         $data = [
@@ -297,7 +298,10 @@ class PrivateModel extends BaseModel
 
         $this->changeMenu($data);
       }
+      $this->db->commit();
     } catch (Exception $e) {
+
+      $this->db->rollBack();
       return [
         'success' => false,
         'message' => $e->getMessage()
