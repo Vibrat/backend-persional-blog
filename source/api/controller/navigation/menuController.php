@@ -21,9 +21,11 @@ use System\Model\Controller;
  * @Flow\Scope("singleton")
  * @return Json
  */
-class MenuController extends Controller {
+class MenuController extends Controller
+{
 
-  public function listAll() {
+  public function listAll()
+  {
     if ($this->http->method() != 'GET') {
       $this->json->sendBack([
         'success' => false,
@@ -58,7 +60,8 @@ class MenuController extends Controller {
    *
    * @Endpoint POST api=navigation/menu/change&token=<>
    */
-  public function change() {
+  public function change()
+  {
     if ($this->http->method() != 'POST') {
       $this->json->sendBack([
         'success' => false,
@@ -105,7 +108,8 @@ class MenuController extends Controller {
    *
    * @Endpoint GET api=navigation/menu/read&token=<>
    */
-  public function read() {
+  public function read()
+  {
     if ($this->http->method() != 'GET') {
       $this->json->sendBack([
         'success' => false,
@@ -116,11 +120,11 @@ class MenuController extends Controller {
     }
 
     $get = $this->http->data('GET');
-    if($this->user->isTokenValid($get['token'])) {
+    if ($this->user->isTokenValid($get['token'])) {
       $this->model->load('navigation/private');
 
       $response = $this->model->private->getNavigation($get);
-      
+
       if ($response['success']) {
         $this->json->sendBack([
           'success' => true,
@@ -134,10 +138,55 @@ class MenuController extends Controller {
         'success' => false,
         'code'    => 204,
         'message' => $response['message']
-      ]); 
+      ]);
       return;
     }
 
+    $this->json->sendBack([
+      'success' => false,
+      'code'    => 401,
+      'message' => 'Unauthenticated'
+    ]);
+  }
+
+  /**
+   * Delete a record from table `navigation` by id
+   *
+   * @Endpoint DELETE api=navigation/menu/delete&token=<>
+   * @payload
+   *  ```
+   *  id: number
+   *  ```
+   */
+  public function delete()
+  {
+    // check method
+    if ($this->http->method() != 'DELETE') {
+      $this->json->sendBack([
+        'success' => false,
+        'code'    => 403,
+        'message' => 'This api only supports method `DELETE`'
+      ]);
+      return;
+    }
+
+    // validate token
+    $get = $this->http->data('GET');
+    if ($this->user->isTokenValid($get['token'])) {
+
+      // load model
+      $this->model->load('navigation/private');
+
+      // delete record
+      $delete = $this->http->data('DELETE');
+      $response = $this->model->private->deleteNavigationById($delete);
+
+      // send response back
+      $this->json->sendBack($response);
+      return;
+    }
+
+    // send response if error
     $this->json->sendBack([
       'success' => false,
       'code'    => 401,

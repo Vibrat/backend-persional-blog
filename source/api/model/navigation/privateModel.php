@@ -10,7 +10,8 @@ class PrivateModel extends BaseModel
     return $query->rows();
   }
 
-  public function getNavigation(array $data) {
+  public function getNavigation(array $data)
+  {
 
     if (!isset($data['group']) || empty($data['group'])) {
       return [
@@ -24,14 +25,14 @@ class PrivateModel extends BaseModel
       ':name' => $data['group']
     ])->row('id');
 
-    $sql_navigation = 
-    "
+    $sql_navigation =
+      "
       SELECT g.id, n.menu, n.link, n.children FROM `" . DB_PREFIX . "navigation_all` n
       LEFT JOIN `" . DB_PREFIX . "navigation` g ON n.id = g.id WHERE g.groupId = :groupId
     ";
 
     if ($groupId != false) {
-      
+
       $result = $this->db->query($sql_navigation, [
         ':groupId'  => $groupId
       ])->rows();
@@ -60,22 +61,14 @@ class PrivateModel extends BaseModel
       ];
     }
 
-    if (!isset($data['link'])) {
-      return [
-        'success' => false,
-        'message' => 'Parameter `link` does not exist'
-      ];
-    }
-
     $input = [
       'name'    => $data['name'],
       'menu'    => $data['menu'],
       'order'   => isset($data['order']) && is_numeric($data['order']) ? $data['order'] : 0,
-      'link'    => isset($data['link']) ? $data['link'] : '',
       'enable'  => isset($data['enable']) && is_numeric($data['enable']) ? $data['enable'] : 0
     ];
 
-    $menuRes= $this->checkMenuExist($input);
+    $menuRes = $this->checkMenuExist($input);
     if (!$menuRes['success'] || $menuRes['data']['total'] == 0) {
       return [
         'success' => false,
@@ -109,7 +102,6 @@ class PrivateModel extends BaseModel
       if (!isset($data['order'])) {
         $input['order'] = $checkRecordExist['data']['order'];
       }
-
     } else {
       $sql = "INSERT INTO `" . DB_PREFIX . "navigation` SET id = :id, groupId = :groupId, enable = :enable, `order` = :order";
     }
@@ -154,7 +146,8 @@ class PrivateModel extends BaseModel
     ];
   }
 
-  public function checkMenuRuleForGroup(array $data) {
+  public function checkMenuRuleForGroup(array $data)
+  {
     if (!isset($data['id'])) {
       return [
         'success' => false,
@@ -191,7 +184,8 @@ class PrivateModel extends BaseModel
     ];
   }
 
-  public function checkGroupExist(array $data) {
+  public function checkGroupExist(array $data)
+  {
     if (!isset($data['name'])) {
       return [
         'success' => false,
@@ -217,6 +211,73 @@ class PrivateModel extends BaseModel
       'success' => false,
       'message' => sprintf('Group `%s` does not exist', $data['name']),
       'data'    => $response
+    ];
+  }
+
+  public function checkNavigationExistById(array $data)
+  {
+    if (!isset($data['id']) || !is_numeric($data['id'])) {
+      return [
+        'success' => false,
+        'message' => 'Parameter `id` does not exist or not valid'
+      ];
+    }
+
+    $sql = "SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "navigation` WHERE id = :id LIMIT 1";
+    $query = $this->db->query($sql, [
+      ':id' => $data['id']
+    ]);
+
+    $num_count = $query->row('total');
+
+    if ($num_count) {
+      return [
+        'success' => true,
+        'data'  => $num_count
+      ];
+    } else {
+      return [
+        'success' => false,
+        'message' => 'No record exists'
+      ];
+    }
+  }
+
+  public function deleteNavigationById(array $data)
+  {
+    if (!isset($data['id']) || !is_numeric($data['id'])) {
+      return [
+        'success' => false,
+        'message' => 'Parameter `id` does not exist or not valid'
+      ];
+    }
+
+    $check_response = $this->checkNavigationExistById($data);
+
+    if ($check_response['success']) {
+
+      $sql_delete = "DELETE FROM `" . DB_PREFIX . "navigation` WHERE id = :id LIMIT 1";
+      $query = $this->db->query($sql_delete, [
+        ':id' => $data['id']
+      ]);
+
+      $num_count = $query->rowsCount();
+      if ($num_count) {
+        return [
+          'success' => true,
+          'message' => 'successfully delete reccord'
+        ];
+      } else {
+        return [
+          'success' => false,
+          'message' => 'No record affected'
+        ];
+      }
+    }
+
+    return [
+      'success' => false,
+      'message' => 'Record does not exist'
     ];
   }
 }
