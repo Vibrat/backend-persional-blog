@@ -295,7 +295,7 @@ class PrivateModel extends BaseModel
           'enable'  => 1
         ];
 
-        $response = $this->changeMenu($data);
+        $this->changeMenu($data);
       }
     } catch (Exception $e) {
       return [
