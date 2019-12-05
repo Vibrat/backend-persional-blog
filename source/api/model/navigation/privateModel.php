@@ -12,18 +12,29 @@ class PrivateModel extends BaseModel
 
   public function getNavigation(array $data)
   {
+    /**
+     * Prioritize to check if group exists
+     *  if not then use token to find groupId
+     */
+    if (isset($data['group']) && !empty($data['group'])) {
+      $sql_group = "SELECT id FROM `" . DB_PREFIX . "users_group` WHERE name = :name LIMIT 1";
+      $groupId = $this->db->query($sql_group, [
+        ':name' => $data['group']
+      ])->row('id');
+    } else if (isset($data['token']) && !empty($data['token'])) {
+      $sql_group = "SELECT u.group_permission_id as id FROM `" . DB_PREFIX . "users_permission` u";
+      $sql_group .= " LEFT JOIN `" . DB_PREFIX . "users_token` t ON (u.user_id = t.id)";
+      $sql_group .= " WHERE t.token = :token LIMIT 1";
 
-    if (!isset($data['group']) || empty($data['group'])) {
+      $groupId =  $this->db->query($sql_group, [
+        ':token'  => $data['token']
+      ])->row('id');
+    } else {
       return [
         'success' => false,
-        'message' => 'Parameter `group` does not exist'
+        'message' => 'There should be one parameter `group` or `token`'
       ];
     }
-
-    $sql_group = "SELECT id FROM `" . DB_PREFIX . "users_group` WHERE name = :name LIMIT 1";
-    $groupId = $this->db->query($sql_group, [
-      ':name' => $data['group']
-    ])->row('id');
 
     $sql_navigation =
       "
