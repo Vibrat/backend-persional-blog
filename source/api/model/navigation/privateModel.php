@@ -21,6 +21,7 @@ class PrivateModel extends BaseModel
       $groupId = $this->db->query($sql_group, [
         ':name' => $data['group']
       ])->row('id');
+
     } else if (isset($data['token']) && !empty($data['token'])) {
       $sql_group = "SELECT u.group_permission_id as id FROM `" . DB_PREFIX . "users_permission` u";
       $sql_group .= " LEFT JOIN `" . DB_PREFIX . "users_token` t ON (u.user_id = t.id)";
@@ -36,24 +37,85 @@ class PrivateModel extends BaseModel
       ];
     }
 
-    $sql_navigation =
-      "
-      SELECT g.id, n.menu, n.link, n.children FROM `" . DB_PREFIX . "navigation_all` n
-      LEFT JOIN `" . DB_PREFIX . "navigation` g ON n.id = g.id WHERE g.groupId = :groupId
-    ";
-
     if ($groupId != false) {
 
-      $result = $this->db->query($sql_navigation, [
+      $sql_navigation = "SELECT id FROM " . DB_PREFIX . "navigation WHERE groupId = :groupId LIMIT 1";
+      $id = $this->db->query($sql_navigation, [
         ':groupId'  => $groupId
+      ])->row('id');
+
+      $sql_navigations =
+        "
+      WITH RECURSIVE menu_tree (id, menu, link, children) AS  (
+        SELECT id, menu, link, children FROM `navigation_all` WHERE id = :id
+        UNION ALL
+        SELECT child.id, child.menu, child.link, child.children
+        FROM `menu_tree` AS parent JOIN `navigation_all` AS child ON FIND_IN_SET(child.id, parent.children)
+      )
+      SELECT * FROM `menu_tree` ORDER BY id;
+      ";
+
+      $result = $this->db->query($sql_navigations, [
+        ':id' => $id
       ])->rows();
+
+      $keys = array_unique(array_map(function ($item) {
+        return $item['id'];
+      }, $result));
+
+      $result = array_filter($result, function ($item) use (&$keys) {
+
+        $indentifier = $item['id'];
+        $foundKey = array_search($indentifier, $keys);
+        if (is_numeric($foundKey)) {
+          unset($keys[$foundKey]);
+          return true;
+        }
+
+        return false;
+      });
+
+      // filtering roots
+      $roots = array_filter($result, function ($item) use ($id) {
+        return $item['id'] == $id;
+      });
+
+      function recur($node, $data, $response)
+      {
+        $children = preg_split('/,/', $node['children']);
+        $response['children'] = [];
+        foreach ($children as $child) {
+
+          $selected = array_filter($data, function ($item) use ($child) {
+            return $item['id'] == $child;
+          });
+
+          foreach ($selected as $child) {
+            if (!empty($child['children'])) {
+              $children = preg_split('/,/', $child['children']);
+              $child['children'] = recur($child, $data, $response);
+            }
+            array_push($response['children'], $child);
+          }
+        }
+
+        return $response['children'];
+      }
+
+      // parsing tree from roots
+      $tree = [];
+      foreach ($roots as $root) {
+        $num_item = array_push($tree, $root);
+        $tree[$num_item - 1]['children'] =  recur($root, $result, $tree);
+      }
 
       $result = $result ? $result : [];
 
       return  [
         'success' => true,
         'message' => 'Ok',
-        'data'    => $result
+        'data'    => $tree,
+        'raw'     => $result,
       ];
     }
 

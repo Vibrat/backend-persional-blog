@@ -128,7 +128,8 @@ class MenuController extends Controller
         $this->json->sendBack([
           'success' => true,
           'code'    => 200,
-          'data'    => $response['data']
+          'data'    => $response['data'],
+          'raw'    => $response['raw']
         ]);
         return;
       }
