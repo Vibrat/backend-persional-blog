@@ -39,13 +39,14 @@ class PrivateModel extends BaseModel
 
     if ($groupId != false) {
 
-      $sql_navigation = "SELECT id FROM " . DB_PREFIX . "navigation WHERE groupId = :groupId LIMIT 1";
-      $id = $this->db->query($sql_navigation, [
+      $sql_navigation = "SELECT id FROM " . DB_PREFIX . "navigation WHERE groupId = :groupId";
+      $ids = $this->db->query($sql_navigation, [
         ':groupId'  => $groupId
-      ])->row('id');
+      ])->rows();
+
 
       $sql_navigations =
-        "
+      "
       WITH RECURSIVE menu_tree (id, menu, icon, link, children) AS  (
         SELECT id, menu, icon, link, children FROM `navigation_all` WHERE id = :id
         UNION ALL
@@ -55,9 +56,13 @@ class PrivateModel extends BaseModel
       SELECT * FROM `menu_tree` ORDER BY id;
       ";
 
-      $result = $this->db->query($sql_navigations, [
-        ':id' => $id
-      ])->rows();
+      $result= [];
+      foreach ($ids as $row) {
+        $res = $this->db->query($sql_navigations, [
+          ':id' => $row['id']
+        ])->rows();
+        $result = array_merge($result, $res);
+      }
 
       $keys = array_unique(array_map(function ($item) {
         return $item['id'];
@@ -76,8 +81,11 @@ class PrivateModel extends BaseModel
       });
 
       // filtering roots
-      $roots = array_filter($result, function ($item) use ($id) {
-        return $item['id'] == $id;
+      $roots = array_filter($result, function ($item) use ($ids) {
+        $keys = array_map(function($item) {
+          return $item['id'];
+        }, $ids);
+        return in_array($item['id'], $keys);
       });
 
       function recur($node, $data, $response)
