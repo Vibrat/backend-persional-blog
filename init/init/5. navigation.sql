@@ -9,6 +9,7 @@ DROP TABLE IF EXISTS `navigation_all`;
 CREATE TABLE `navigation_all` (
     `id` INT(11) UNIQUE NOT NULL AUTO_INCREMENT,
     `menu` VARCHAR(255) UNIQUE NOT NULL,
+    `icon` VARCHAR(255) DEFAULT '',
     `link` VARCHAR(255) DEFAULT '',
     `children` LONGTEXT,
     PRIMARY KEY (`id`)
@@ -25,10 +26,18 @@ CREATE TABLE `navigation` (
     CONSTRAINT `navigation__navigation_all` FOREIGN KEY (`id`) REFERENCES `navigation_all` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-INSERT INTO `navigation_all` (`menu`, `link`, `children`) VALUES
-('account', '/admin/dashboard/account', ''),
-('group', '/admin/dashboard/group', ''),
-('navigation', '/admin/navigation', ''),
-('menu', '/admin/menu', ''),
-('blog', '/admin/blog', ''),
-('file', '/admin/file', '');
+INSERT INTO `navigation_all` (`menu`, `icon`, `link`, `children`) VALUES
+('account', 'user', '/admin/dashboard/account', ''),
+('group', 'team', '/admin/dashboard/group', ''),
+('navigation', 'layout', '/admin/navigation', ''),
+('menu',  'menu', '/admin/menu', ''),
+('blog', 'read', '/admin/blog', ''),
+('file', 'file', '/admin/file', '');
+
+INSERT INTO `navigation` (`id`, `groupId`, `enable`, `order`) VALUES 
+('1', '1', '1', '1'),
+('2', '1', '1', '1'),
+('3', '1', '1', '1'),
+('4', '1', '1', '1'),
+('5', '1', '1', '1'),
+('6', '1', '1', '1');

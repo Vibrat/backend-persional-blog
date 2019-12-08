@@ -46,10 +46,10 @@ class PrivateModel extends BaseModel
 
       $sql_navigations =
         "
-      WITH RECURSIVE menu_tree (id, menu, link, children) AS  (
-        SELECT id, menu, link, children FROM `navigation_all` WHERE id = :id
+      WITH RECURSIVE menu_tree (id, menu, icon, link, children) AS  (
+        SELECT id, menu, icon, link, children FROM `navigation_all` WHERE id = :id
         UNION ALL
-        SELECT child.id, child.menu, child.link, child.children
+        SELECT child.id, child.menu, child.icon, child.link, child.children
         FROM `menu_tree` AS parent JOIN `navigation_all` AS child ON FIND_IN_SET(child.id, parent.children)
       )
       SELECT * FROM `menu_tree` ORDER BY id;
