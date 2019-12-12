@@ -2,7 +2,7 @@
 
 /**
  * Public API for Blog API
- * 
+ *
  */
 
  use \System\Model\Controller;
@@ -11,14 +11,14 @@
 
     /**
      * Check if this api is active
-     * 
-     * @endpoint GET api=blog/public/enablement&token=<>
+     *
+     * @endpoint GET api=blog/article/public/enablement&token=<>
      */
     public function enablement() {
 
         $get_data = $this->http->data('GET');
         if($this->user->isTokenValid($get_data['token'])) {
-            
+
             $this->json->sendBack([
                 'success'   => true,
                 'code'      => 200,
@@ -36,10 +36,10 @@
 
     /**
      * Create new blog record
-     * 
-     * @endpoint POST api=blog/public/create&token=<>
-     * @param string title - required - unique value 
-     * @param string des - optional 
+     *
+     * @endpoint POST api=blog/article/public/create&token=<>
+     * @param string title - required - unique value
+     * @param string des - optional
      * @param string tags - optional
      * @param string category - optional
      * @param string seo_title - required - unique value
@@ -48,7 +48,7 @@
      */
     public function create() {
         if ($this->http->method() != 'POST') {
-            
+
             $this->json->sendBack([
                 'success'   => false,
                 'code'      => 403,
@@ -59,8 +59,8 @@
 
         $get_data = $this->http->data('GET');
         if ($this->user->isTokenValid($get_data['token'])) {
-            
-            $this->model->load("blog/blog");           
+
+            $this->model->load("blog/blog");
             $post_data = $this->http->data('POST');
             $response = $this->model->blog->addNewRecord($post_data);
 
@@ -91,8 +91,8 @@
 
     /**
      * Delete a article
-     * 
-     * @endpoint DELETE api=blog/public/delete&id=<>&token=<>
+     *
+     * @endpoint DELETE api=blog/article/public/delete&id=<>&token=<>
      * @param string id - blog id
      * @param string token
      */
@@ -120,11 +120,11 @@
                 ]);
                 return;
             }
-            
+
             $this->json->sendBack([
                 'success'   => false,
                 'code'      => 403,
-                'message'   => 'There is no article with id ' . $get_data['id'] 
+                'message'   => 'There is no article with id ' . $get_data['id']
             ]);
             return;
         }
@@ -139,8 +139,8 @@
 
     /**
      * Get a blog record
-     * 
-     * @endpoint GET api=blog/public/get&id=<>&token=<>
+     *
+     * @endpoint GET api=blog/article/public/get&id=<>&token=<>
      * @param string id - id of blog
      * @param string token
      */
@@ -162,7 +162,7 @@
 
             $response = $this->model->blog->getARecord($get_data['id']);
             if ($response['success']) {
-                
+
                 $this->json->sendBack([
                     'success'   => true,
                     'code'      => 200,
@@ -185,11 +185,11 @@
             'message'   => 'Token is invalid'
         ]);
     }
-    
+
     /**
       * List records in table `blog`
-      * 
-      * @endpoint GET api=blog/public/list&limit=<>&offset=<>0&category=<>&timestamp&tags=<> 
+      *
+      * @endpoint GET api=blog/article/public/list&limit=<>&offset=<>0&category=<>&timestamp&tags=<>
       * @param number limit
       * @param number offset
       * @param string category
@@ -197,23 +197,23 @@
       * @param null timestamp
       */
     public function list() {
-     
+
         // Checking allowed method
         if ($this->http->method() != 'GET') {
             $this->json->sendBack([
                 'success'   => false,
-                'code'      => 403, 
+                'code'      => 403,
                 'message'   => 'This API onlsy supports method GET'
             ]);
             return;
         }
 
         $get_data = $this->http->data('GET');
-        
-        // Allow to only query 100 articles at a time 
+
+        // Allow to only query 100 articles at a time
         if (!isset($get_data['limit']) || $get_data['limit'] > 100 ) {
             $get_data['limit'] = 100;
-        } 
+        }
 
         $this->model->load('blog/blog');
         $response = $this->model->blog->listRecords($get_data);
@@ -230,10 +230,10 @@
 
     /**
      * Update new blog record
-     * 
-     * @endpoint POST api=blog/public/update&token=<>
-     * @param string title - required - unique value 
-     * @param string des - optional 
+     *
+     * @endpoint POST api=blog/article/public/update&token=<>
+     * @param string title - required - unique value
+     * @param string des - optional
      * @param string tags - optional
      * @param string category - optional
      * @param string seo_title - required - unique value
