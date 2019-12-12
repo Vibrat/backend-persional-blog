@@ -1,14 +1,16 @@
 <?php
+namespace System\Model;
+
 /**
  * Model Extension
  */
 abstract class BaseModel {
-    
+
     private $deps = [];
 
     ## Init BaseModel
     function __construct($deps) {
-        
+
         ## load dependencies
         foreach($deps as $key => $value) {
             $this->deps[$key] = $value;
@@ -17,7 +19,7 @@ abstract class BaseModel {
 
     /**
      * get a property
-     * 
+     *
      * @param String $name db
      */
     function __get ($name) {
