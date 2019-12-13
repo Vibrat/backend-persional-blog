@@ -21,7 +21,67 @@ class PublicController extends Controller
    *  - name: string;
    */
   public function create()
-  { }
+  {
+    // Validate Method
+    if ($this->http->method() != 'POST') {
+      $this->json->sendBack([
+        'success' => true,
+        'code'    => 405,
+        'message' => 'This api only supports method `POST`'
+      ]);
+      return;
+    }
+
+    // Validate token
+    $get = $this->http->data('GET');
+    if ($this->user->isTokenValid($get['token'])) {
+      // Load model
+      $this->model->load('blog/blogCategory');
+
+      $post = $this->http->data('POST');
+      $response = $this->model->blogCategory->addNewCategory($post);
+
+      if ($response['success']) {
+        $this->json->sendBack([
+          'success' => true,
+          'code'    => 201,
+          'message' => 'category is created'
+        ]);
+        return;
+      }
+
+      switch ($response['code']) {
+        case 'ERROR_MODEL_PARAM':
+          $this->json->sendBack([
+            'success' => false,
+            'code'    => 400,
+            'message' => $response['message']
+          ]);
+          break;
+        case 'ERROR_MODEL_RECORD_EXIST':
+          $this->json->sendBack([
+            'success' => false,
+            'code'    => 409,
+            'message' => $response['message']
+          ]);
+          break;
+        default:
+          $this->json->sendBack([
+            'success' => false,
+            'code'    => 400,
+            'message' => $response['message']
+          ]);
+      }
+
+      return;
+    }
+
+    $this->json->sendBack([
+      'success' => false,
+      'code'    => 401,
+      'message' => 'Unauthenticated'
+    ]);
+  }
 
   /**
    * Check If Category Exists
