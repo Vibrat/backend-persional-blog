@@ -89,7 +89,35 @@ class PublicController extends Controller
    * @Endpoint GET api=blog/category/public/exist&name=<>&token=<>
    */
   public function exist()
-  { }
+  {
+    // Validate method
+    if ($this->http->method() != 'GET') {
+      $this->json->sendBack([
+        'success' => false,
+        'code'    => 405,
+        'message' => 'This api only supports method `GET`'
+      ]);
+      return;
+    }
+
+    $get = $this->http->data('GET');
+    if ($this->user->isTokenValid($get['token'])) {
+      // load model
+      $this->model->load('blog/blogCategory');
+
+      $response = $this->model->blogCategory->checkCategory($get['name']);
+      // @TODO: Validate response and send back here
+      $this->json->sendBack($response);
+      return;
+    }
+
+    $this->json->sendBack(
+      [
+        'success' => false,
+        'code'    => 401,
+        'message' => 'Unauthenticated'
+      ]);
+  }
 
   /**
    * List Categories

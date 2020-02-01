@@ -71,6 +71,43 @@ class BlogCategoryModel extends BaseModel
   }
 
   /**
+   * Check if category exists by name
+   *
+   * @Payload:
+   *  - $name: string
+   */
+  public function checkCategory(string $name) {
+    // validate string
+    if (!is_string($name)) {
+      return [
+        'success' => false,
+        'code'    => 'ERROR_MODEL_CATEGORY_NAME',
+        'message' => 'Parameter $name is not string'
+      ];
+    }
+
+    try {
+      $sql_check  = "SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "blog_category` WHERE name = :name LIMIT 1";
+      $result = $this->db->query($sql_check,  [
+        ':name' => $name
+      ])->row('total');
+
+      return [
+        'success' => $result > 0,
+        'code'    => $result > 0 ? 'OK' : 'ERROR_RECORD_NOT_FOUND',
+        'message' => $result > 0 ? 'Category exists' : 'Category not found'
+      ];
+    } catch (Exception $e) {
+      return [
+        'success' => false,
+        'code'    => 'ERROR_MODEL_CATEGORY_MYSQL',
+        'message' => $e->getMessage()
+      ];
+    }
+  }
+
+
+  /**
    * Delete Category
    *
    * @Payload:
