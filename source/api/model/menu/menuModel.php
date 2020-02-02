@@ -1,7 +1,9 @@
 <?php
 
+use \System\Model\BaseModel;
+
 class MenuModel extends BaseModel {
-   
+
     /**
      * Check if module is installed
      */
@@ -12,37 +14,37 @@ class MenuModel extends BaseModel {
 
     /**
      * List data from table `menu`
-     * 
-     * @param String offset 
+     *
+     * @param String offset
      * @param String limit
      */
-    public function getMenuList($data) { 
-        
-        if (is_numeric($data['offset']) && 
+    public function getMenuList($data) {
+
+        if (is_numeric($data['offset']) &&
             is_numeric($data['limit'])) {
-            
+
             $sql = "SELECT `category`, `name`, `order` FROM `" . DB_PREFIX . "menu` LIMIT " . $data['offset'] . ", " . $data['limit'] . "";
             $query = $this->db->query($sql);
-    
+
             return $query->rows();
         }
-        
+
         throw new \Exception('Input data for this method is invalidated');
     }
 
     /**
      * Add new record into table `menu`
-     * 
+     *
      * @param string $data['category']
      * @param string $data['name']
      * @param number $data['order']
      * @param string $data['children']
      * @param number $data['enable']
-     */ 
+     */
     public function addNewMenu(Array $data) {
         $errors = [];
 
-        if (!is_string($data['category'])) { 
+        if (!is_string($data['category'])) {
             array_push($errors, 'parameter category is not string type');
         }
 
@@ -83,7 +85,7 @@ class MenuModel extends BaseModel {
                     ':order'    => (int) $data['order'],
                     ':children'  => $data['children']
                 ]);
-    
+
                 return [
                     'success'       => true,
                     '_affectedRows' =>$query->rowsCount()
@@ -94,8 +96,8 @@ class MenuModel extends BaseModel {
                 'success'   => false,
                 'message'   => 'menu name already exists in database'
             ];
-           
-        } 
+
+        }
 
         return [
             'success'   => false,
@@ -105,7 +107,7 @@ class MenuModel extends BaseModel {
 
     /**
      * Read a menu from table `menu`
-     * 
+     *
      * @param string $name name of menu to query
      */
     public function readMenu($name) {
@@ -120,7 +122,7 @@ class MenuModel extends BaseModel {
         $query = $this->db->query($sql, [
             ':name' => $name
         ]);
-        
+
         return [
             'success'   => true,
             'data'      =>$query->row()
@@ -129,12 +131,12 @@ class MenuModel extends BaseModel {
 
     /**
      * Update a record in table 'menu'
-     * 
+     *
      * @param string name: name of menu to update information
      * @param string category: category information to update
-     * @param number order: number type string 
+     * @param number order: number type string
      * @param string children: string delimited by comma
-     * @param number is_init: 1 | 0 
+     * @param number is_init: 1 | 0
      */
     public function updateMenu($data) {
         // parameters that are allowed in this method
@@ -151,7 +153,7 @@ class MenuModel extends BaseModel {
         $counts_menu = $this->db->query($sql_count_menu, [
             ':name'     => $data['name']
         ])->row('total');
-        
+
         // Start Update information
         if ($counts_menu) {
             $sql_update_menu = "UPDATE `" . DB_PREFIX . "menu` SET ";
@@ -163,7 +165,7 @@ class MenuModel extends BaseModel {
                     if (next($params)) {
                         $sql_update_menu .= ', ';
                     }
-                    
+
                     $bind_params = array_merge($bind_params, [
                         ':' . $key => $data[$key]
                         ]);
@@ -171,11 +173,11 @@ class MenuModel extends BaseModel {
             }
 
             $sql_update_menu .= " WHERE `name` = :name";
-            $query = $this->db->query($sql_update_menu, 
+            $query = $this->db->query($sql_update_menu,
                 array_merge([
                     ':name' => $data['name']
                 ], $bind_params));
-            
+
             return [
                 'success'   => true,
                 'data' => $query->rowsCount()
@@ -190,11 +192,11 @@ class MenuModel extends BaseModel {
 
     /**
      * Delete a record in table menu
-     * 
+     *
      * @param string name - name of a record
      */
     public function deleteMenu(String $name) {
-        
+
         $sql = "DELETE FROM `" . DB_PREFIX . "menu` WHERE `name` = :name LIMIT 1";
         $query = $this->db->query($sql, [
             ':name' => $name

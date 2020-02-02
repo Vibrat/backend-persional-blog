@@ -1,5 +1,7 @@
 <?php
 
+use \System\Model\BaseModel;
+
 /**
  * Class Model for Group Permission
  *

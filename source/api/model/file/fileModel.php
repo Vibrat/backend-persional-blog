@@ -1,14 +1,17 @@
 <?php
+
+use \System\Model\BaseModel;
+
 /**
  * Model for File API
- * 
+ *
  */
 
 class FileModel extends BaseModel {
 
     /**
      * Add new record into table `file`
-     * 
+     *
      * @param string filename
      * @param string path
      */
@@ -24,7 +27,7 @@ class FileModel extends BaseModel {
 
     /**
      * Count Record in table `file`
-     * 
+     *
      * @param string filename
      * @return number 0 | 1
      */
@@ -38,7 +41,7 @@ class FileModel extends BaseModel {
 
     /**
      * Delete a record
-     * 
+     *
      * @param string filename
      */
     public function deleteFileRecord($filename) {
