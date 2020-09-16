@@ -8,7 +8,7 @@ RUN a2enmod rewrite
 
 ## install necessary extensions
 RUN docker-php-ext-install mysqli
-RUN docker-php-ext-install pdo pdo_mysql 
+RUN docker-php-ext-install pdo pdo_mysql
 
 ## installing gd - processing image
 RUN apt-get update \
@@ -18,17 +18,17 @@ RUN apt-get update \
     && docker-php-ext-install -j$(nproc) gd
 
 
-# RUN apt-get update  \ 
+# RUN apt-get update  \
 #     && docker-php-ext-install gd
 
 # RUN apt-get update  \
 #     && docker-php-ext-install mcrypt
 RUN pecl install xdebug-2.7.2 && docker-php-ext-enable xdebug
 COPY ./server/xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-    
+
 COPY ./source/ /var/www/html/
 COPY ./init/ /var/init/
 COPY ./server/ /var/server/
-COPY ./server/apache/ports.conf /etc/apache2/ports.conf        
+# COPY ./server/apache/ports.conf /etc/apache2/ports.conf
 
 CMD docker-php-entrypoint apache2-foreground

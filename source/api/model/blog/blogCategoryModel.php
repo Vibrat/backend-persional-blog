@@ -76,7 +76,8 @@ class BlogCategoryModel extends BaseModel
    * @Payload:
    *  - $name: string
    */
-  public function checkCategory(string $name) {
+  public function checkCategory(string $name)
+  {
     // validate string
     if (!is_string($name)) {
       return [
@@ -114,15 +115,49 @@ class BlogCategoryModel extends BaseModel
    *  - name: string;
    */
   public function deleteCategory(array $data)
-  { }
+  {
+  }
 
   /**
    * Select Categories
    *
    * @Payload:
    *  - limit: number;
-   *  - order: 'desc', 'asc';
+   *  - offset: number;
    */
   public function selectCategories(array $data)
-  { }
+  {
+    $params = [
+      'limit'  => 20,
+      'offset' => 0,
+    ];
+
+    foreach (array_keys($params) as $param) {
+      if (!isset($data[$param])) {
+        $data[$param] = $params[$param];
+      } else {
+
+        $type = (is_numeric($data[$param]) ? 'integer' : 'string');
+        $data[$param] = (int) $data[$param];
+        $check_type = gettype($params[$param]);
+
+        if ($type != $check_type) {
+          return [
+            'success' => false,
+            'code'    => 'MODEL_PARAM_TYPE_ERROR',
+            'message' => 'Parameter ' . $param . ' does not have type ' . $check_type
+          ];
+        }
+      }
+    }
+
+    $sql = "SELECT * FROM `" . DB_PREFIX . "blog_category` LIMIT " . $data['limit'] . " OFFSET " . $data['offset'];
+    $query = $this->db->query($sql);
+
+    return [
+      'success' => true,
+      'code'    => 'OK',
+      'data'    => $query->rows()
+    ];
+  }
 }

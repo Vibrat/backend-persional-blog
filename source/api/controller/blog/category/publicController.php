@@ -122,10 +122,26 @@ class PublicController extends Controller
   /**
    * List Categories
    *
-   * @Endpoint GET api=blog/category/public/list&limit=<>&token=<>
+   * @Endpoint GET api=blog/category/public/list&limit=<>&offset=<>
    */
   public function list()
-  { }
+  {
+    if ($this->http->method() != 'GET') {
+      $this->json->sendBack(
+        [
+          'success' => false,
+          'code'    => 405,
+          'message' => 'This api only supports method `GET`'
+        ]);
+      return;
+    }
+
+    $this->model->load('blog/blogCategory');
+    $get = $this->http->data('GET');
+    // @TODO: Return response here
+    $response = $this->model->blogCategory->selectCategories($get);
+    $this->json->sendBack($response);
+  }
 
   /**
    * Delete Category
