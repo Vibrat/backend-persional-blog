@@ -1,5 +1,7 @@
 <?php
 
+use \System\Model\BaseModel;
+
 class PrivateModel extends BaseModel
 {
   public function getMenuTree()

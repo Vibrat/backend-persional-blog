@@ -1,8 +1,10 @@
 <?php
 
+use \System\Model\BaseModel;
+
 /**
  * Account Model - Modify DB
- * 
+ *
  * Please do not use __construct here
  */
 class AccountModel extends BaseModel
@@ -10,7 +12,7 @@ class AccountModel extends BaseModel
 
     /**
      * Check if account exists
-     * 
+     *
      * @param String $username
      * @return Number number of records exist
      */
@@ -27,7 +29,7 @@ class AccountModel extends BaseModel
 
     /**
      * Create new Account
-     *  
+     *
      * @param Array $data ['username' => 'lamnguyen', 'password' => '123456789' ]
      */
     public function createAccount($data)
@@ -42,13 +44,13 @@ class AccountModel extends BaseModel
 
     /**
      * Get an account information based on username
-     * 
+     *
      * @param String $username
      */
     public function getAccount(String $username) {
         if (isset($username) && is_String($username)) {
             $sql_account  = "SELECT u.`id`, u.`username`, g.`name` AS `groupname` FROM `" . DB_PREFIX . "users` u";
-            $sql_account .= " LEFT JOIN `" . DB_PREFIX . "users_permission` p ON (u.id = p.user_id)" .  
+            $sql_account .= " LEFT JOIN `" . DB_PREFIX . "users_permission` p ON (u.id = p.user_id)" .
                             " LEFT JOIN `" . DB_PREFIX . "users_group` g  ON (p.group_permission_id = g.id)";
             $sql_account .= " WHERE u.username = :username";
 
@@ -70,13 +72,13 @@ class AccountModel extends BaseModel
 
     /**
      * Change password
-     * 
+     *
      * @param username
      * @param old-password
      * @param new-password
      */
     public function changePassword(Array $data) {
-        
+
         # Check if parameters exist
         $parameters = ['username', 'old-password', 'new-password'];
         foreach($parameters as $param) {
@@ -95,7 +97,7 @@ class AccountModel extends BaseModel
         $result_db_user_pwd = $this->db->query($db_user_pwd, [
             ':username' => $data['username']
         ])->row('password');
-            
+
         if (!$result_db_user_pwd) {
             return [
                 'success'   => false,
@@ -106,7 +108,7 @@ class AccountModel extends BaseModel
 
         # Start change password md5
         if (password_verify($data['old-password'], $result_db_user_pwd)) {
-            
+
             $update_pwd = "UPDATE `" . DB_PREFIX . "users` SET password = :password WHERE username = :username";
             $affected_rows = $this->db->query($update_pwd, [
                 ':username' => $data['username'],
@@ -132,16 +134,16 @@ class AccountModel extends BaseModel
             'code'      => 'DB_ACCOUNT_MODEL_RECORD',
             'message'   => 'Password is incorrect'
         ];
-    } 
+    }
 
     /**
      * Change password from Admin Role
-     * 
+     *
      * @param username
      * @param new-password
      */
     public function changePasswordByAdmin(Array $data) {
-        
+
         # Check if data exists
         $params = ['username', 'new-password'];
         foreach($params as $param) {
@@ -161,19 +163,19 @@ class AccountModel extends BaseModel
         ])->row('total');
 
         if ($is_username_exist) {
-            
+
             $sql_update_password = "UPDATE `" . DB_PREFIX . "users` SET password = :password WHERE username = :username LIMIT 1";
             $affected_rows = $this->db->query($sql_update_password, [
                 ':password' => password_hash($data['new-password'], PASSWORD_BCRYPT),
                 ':username' => $data['username']
             ])->rowsCount();
-            
+
             if ($affected_rows) {
                 return [
                     'success'   => true,
                     'message'   => 'Updated password for user ' . $data['username']
                 ];
-            }    
+            }
 
             return [
                 'success'   => false,
@@ -191,7 +193,7 @@ class AccountModel extends BaseModel
 
     /**
      * List users
-     * 
+     *
      * @param offset optional default 0
      * @param limit optional default 100
      * @param group optional default *
@@ -231,7 +233,7 @@ class AccountModel extends BaseModel
 
         # Query Statistics
         $sql  = "SELECT COUNT(*) as total FROM `" . DB_PREFIX . "users` u";
-        $sql .= " LEFT JOIN `" . DB_PREFIX . "users_permission` p ON (u.id = p.user_id)" .  
+        $sql .= " LEFT JOIN `" . DB_PREFIX . "users_permission` p ON (u.id = p.user_id)" .
                         " LEFT JOIN `" . DB_PREFIX . "users_group` g  ON (p.group_permission_id = g.id) WHERE 1 = 1";
         $sql .= ($data['group'] ? " AND g.`name` LIKE :group" : "");
         $sql .= ($data['name'] ?  " AND u.`username` LIKE :name" : "");
@@ -241,7 +243,7 @@ class AccountModel extends BaseModel
 
         # Query Data
         $sql_account = "SELECT u.`id`, u.`username`, JSON_OBJECTAGG(IFNULL(g.id, '_'), IFNULL(g.name, '_')) AS `group` FROM `" . DB_PREFIX . "users` u";
-        $sql_account .= " LEFT JOIN `" . DB_PREFIX . "users_permission` p ON (u.id = p.user_id)" .  
+        $sql_account .= " LEFT JOIN `" . DB_PREFIX . "users_permission` p ON (u.id = p.user_id)" .
                         " LEFT JOIN `" . DB_PREFIX . "users_group` g  ON (p.group_permission_id = g.id) WHERE 1 = 1";
         $sql_account .= ($data['group'] ? " AND g.`name` LIKE :group" : "");
         $sql_account .= ($data['name'] ?  " AND u.`username` LIKE :name" : "");
@@ -254,7 +256,7 @@ class AccountModel extends BaseModel
         # Reformat Data
         $accounts = array_map(function($item) {
             $item['group'] = json_decode($item['group']);
-            
+
             # Unset default value getting from mysql JSON_OBJECTAGG
             unset($item['group']->_);
             return $item;
@@ -266,7 +268,7 @@ class AccountModel extends BaseModel
             'data'    => $accounts,
             'total'   => $total,
             'offset'  => $data['offset'],
-            'limit'   => $data['limit']    
+            'limit'   => $data['limit']
         ];
     }
 

@@ -57,6 +57,6 @@ final class Model {
             return;
         }
 
-        trigger_error('file does not exist in path' . $path, E_USER_ERROR);
+        trigger_error('file does not exist in path ' . $path, E_USER_ERROR);
     }
  }

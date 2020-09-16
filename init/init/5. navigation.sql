@@ -34,7 +34,7 @@ INSERT INTO `navigation_all` (`menu`, `icon`, `link`, `children`) VALUES
 ('blog', 'read', '/admin/blog', ''),
 ('file', 'file', '/admin/file', '');
 
-INSERT INTO `navigation` (`id`, `groupId`, `enable`, `order`) VALUES 
+INSERT INTO `navigation` (`id`, `groupId`, `enable`, `order`) VALUES
 ('1', '1', '1', '1'),
 ('2', '1', '1', '1'),
 ('3', '1', '1', '1'),

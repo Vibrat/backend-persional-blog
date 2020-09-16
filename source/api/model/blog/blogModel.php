@@ -1,15 +1,17 @@
 <?php
-/**
- * Model for table `blog`
- */
 
+use \System\Model\BaseModel;
+
+/**
+ * Model Table Representing Table `blog`
+ */
  class BlogModel extends BaseModel {
 
     /**
      * Add New Record
-     * 
-     * @param string title - required - unique value 
-     * @param string des - optional 
+     *
+     * @param string title - required - unique value
+     * @param string des - optional
      * @param string tags - optional
      * @param string category - optional
      * @param string seo_title - required - unique value
@@ -32,7 +34,7 @@
                 if (isset($data[$key])) {
                     return;
                 }
-    
+
                 if (!$item['required']) {
                     $data[$key] = (!$item['required']) ? $item['default'] : null;
                 } else {
@@ -47,7 +49,7 @@
         }
 
         ## Count numbers of title
-        $sql_count_title     = "SELECT COUNT(*) as total FROM `" . DB_PREFIX ."blog` WHERE `title` = :title LIMIT 1"; 
+        $sql_count_title     = "SELECT COUNT(*) as total FROM `" . DB_PREFIX ."blog` WHERE `title` = :title LIMIT 1";
         if ($this->db->query($sql_count_title, [
             ':title'    => $data['title']
         ])->row('total')) {
@@ -78,7 +80,7 @@
                 'message'   => 'There is already an article with seo_url as ' . $data['seo_url']
             ];
         }
-       
+
         ## Insert a record into table blog
         $sql   = "INSERT INTO `" . DB_PREFIX . "blog` (`title`, `des`, `tags`, `category`, `seo_title`, `seo_des`, `seo_url`) VALUES (:title, :des, :tags, :category, :seo_title, :seo_des, :seo_url)";
         $query = $this->db->query($sql, [
@@ -92,16 +94,16 @@
         ]);
 
         return [
-            'success'       => true, 
+            'success'       => true,
             'data'          => $query->rowsCount()
         ];
     }
 
     /**
      * Update New Record
-     * 
-     * @param string title - required - unique value 
-     * @param string des - optional 
+     *
+     * @param string title - required - unique value
+     * @param string des - optional
      * @param string tags - optional
      * @param string category - optional
      * @param string seo_title - required - unique value
@@ -125,7 +127,7 @@
                 if (isset($data[$key])) {
                     return;
                 }
-    
+
                 if (!$item['required']) {
                     $data[$key] = (!$item['required']) ? $item['default'] : null;
                 } else {
@@ -151,7 +153,7 @@
         }
 
         ## Count numbers of title
-        $sql_count_title     = "SELECT COUNT(*) as total FROM `" . DB_PREFIX ."blog` WHERE `title` = :title AND `id` != :id LIMIT 1"; 
+        $sql_count_title     = "SELECT COUNT(*) as total FROM `" . DB_PREFIX ."blog` WHERE `title` = :title AND `id` != :id LIMIT 1";
         if ($this->db->query($sql_count_title, [
             ':title'    => $data['title'],
             ':id'       => $data['id']
@@ -185,7 +187,7 @@
                 'message'   => 'There is already an article with seo_url as ' . $data['seo_url']
             ];
         }
-       
+
         ## Insert a record into table blog
         $sql   = "UPDATE `" . DB_PREFIX . "blog` SET ";
 
@@ -216,19 +218,19 @@
         ]);
 
         return [
-            'success'       => true, 
+            'success'       => true,
             'data'          => $query->rowsCount()
         ];
     }
 
     /**
      * Delete a row in table `blog`
-     * 
-     * @param string $id 
+     *
+     * @param string $id
      */
     public function deleteARecord($id) {
         if (is_string($id)) {
-            
+
             $sql = "DELETE FROM `" . DB_PREFIX . "blog` WHERE `id` = :id LIMIT 1";
             $query = $this->db->query($sql, [
                 ':id'       => $id
@@ -248,12 +250,12 @@
 
     /**
      * Get a row in table blog
-     * 
+     *
      * @param string $id
      */
     public function getARecord($id) {
         if (is_String($id)) {
-            
+
             $sql = "SELECT * FROM `" . DB_PREFIX . "blog` WHERE `id` = :id LIMIT 1";
             $query = $this->db->query($sql, [
                 ':id'   => $id
@@ -274,7 +276,7 @@
 
     /**
      * List data from table `blog`
-     * 
+     *
      * @param number limit
      * @param number offset
      * @param string tags
@@ -284,7 +286,7 @@
     public function listRecords($data) {
 
         // split and filter tags
-        if (isset($data['tags']) 
+        if (isset($data['tags'])
             && is_string($data['tags'])) {
             foreach(explode(",", $data['tags']) as  $key=>$tag) {
                 if  (!empty($tag = trim($tag))) {
@@ -296,7 +298,7 @@
         }
 
         // split and filter category
-        if (isset($data['category']) 
+        if (isset($data['category'])
             && is_string($data['category'])) {
             foreach(explode(",", $data['category']) as $key=>$category) {
                 if(!empty($category = trim($category))) {
@@ -309,7 +311,7 @@
 
         $timestamp = isset($data['timestamp']);
 
-        if (is_numeric($data['offset']) 
+        if (is_numeric($data['offset'])
             && is_numeric($data['limit'])) {
 
             $sql = "SELECT * FROM `" . DB_PREFIX . "blog`";
@@ -321,7 +323,7 @@
             $sql_count .= (!empty($sql_data) ? " WHERE" : "");
 
             if (!empty($tags)) {
-                
+
                 $regexp = "^(.*" . implode("[,$]|.*", array_values($tags)) ."[,$])";
                 $sql_regex_data ['tag'] = $regexp;
                 $sql .= " `tags` REGEXP :tag";
@@ -335,12 +337,12 @@
                 $sql_regex_data['categories'] = $regexp;
                 $sql .= " `category` REGEXP :categories";
                 $sql_count .= " `category` REGEXP :categories";
-                
+
             }
 
             $sql .= ($timestamp ? " ORDER BY `timestamp`" : "");
             $sql .= " LIMIT " . $data['offset'] .", " . $data['limit'] . "";
-            
+
             $query_data = $this->db->query($sql, $sql_regex_data)->rows();
             $query_data_count = $this->db->query($sql_count, $sql_regex_data)->row('total');
 

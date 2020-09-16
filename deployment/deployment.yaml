@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: rest-api-deployment
   namespace: rest-api
-spec: 
+spec:
   replicas: 2
   selector:
     matchLabels:
